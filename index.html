@@ -101,8 +101,13 @@ header .subtitle {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 12px 16px 0;
+  padding: 12px 16px 8px;
   flex-shrink: 0;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  width: max-content;
+  min-width: 100%;
 }
 
 .month-nav-btn {
@@ -164,9 +169,10 @@ header .subtitle {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
-.view { display: none; flex-direction: column; flex: 1; overflow: hidden; opacity: 0; transform: translateY(10px); }
+.view { display: none; flex-direction: column; flex: 1; overflow: hidden; min-height: 0; opacity: 0; transform: translateY(10px); }
 .view.active { display: flex; animation: viewEnter 0.3s ease forwards; }
 
 @keyframes viewEnter {
@@ -240,10 +246,6 @@ header .subtitle {
 
 .grid-table thead th.today-col {
   border-bottom: 2px solid var(--green);
-}
-
-.grid-table thead th.weekend {
-  opacity: 0.6;
 }
 
 .grid-table thead th:first-child {
@@ -367,15 +369,6 @@ tr:hover .delete-btn { opacity: 0.5; }
   border-left: 1px solid var(--green-dim);
   border-right: 1px solid var(--green-dim);
   background: rgba(61, 154, 80, 0.06);
-}
-
-/* Future day cells are dimmed */
-.grid-table td.future-col {
-  opacity: 0.25;
-}
-
-.grid-table thead th.future-col {
-  opacity: 0.25;
 }
 
 /* ========== CHECK CELL ========== */
@@ -750,18 +743,17 @@ tr:hover .delete-btn { opacity: 0.5; }
 <div id="app">
 
 
-  <!-- MONTH NAVIGATION (visible on today view only) -->
-  <div class="month-nav" id="monthNav">
-    <button class="month-nav-btn" id="navPrev" title="Previous month">◀</button>
-    <div class="month-label" id="monthLabel">March 2026</div>
-    <button class="month-nav-btn" id="navNext" title="Next month">▶</button>
-  </div>
-
   <!-- CONTENT -->
   <div class="content">
     <!-- TODAY VIEW -->
     <div class="view active" id="todayView">
       <div class="grid-wrapper" id="gridWrapper">
+        <!-- MONTH NAVIGATION -->
+        <div class="month-nav" id="monthNav">
+          <button class="month-nav-btn" id="navPrev" title="Previous month">◀</button>
+          <div class="month-label" id="monthLabel">March 2026</div>
+          <button class="month-nav-btn" id="navNext" title="Next month">▶</button>
+        </div>
         <table class="grid-table" id="habitGrid">
           <thead><tr id="gridHeader"></tr></thead>
           <tbody id="gridBody"></tbody>
@@ -1193,16 +1185,20 @@ function renderGrid() {
       cell.className = 'check-cell';
       if (isChecked(habit.id, dateStr)) cell.classList.add('checked');
 
-      cell.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleCheck(habit.id, dateStr);
-        cell.classList.toggle('checked');
-        renderGrid();
-        if (isChecked(habit.id, dateStr)) {
-          checkMilestones(habit.id);
-          checkDayComplete();
-        }
-      });
+      if (isFuture) {
+        cell.style.cursor = 'not-allowed';
+      } else {
+        cell.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleCheck(habit.id, dateStr);
+          cell.classList.toggle('checked');
+          renderGrid();
+          if (isChecked(habit.id, dateStr)) {
+            checkMilestones(habit.id);
+            checkDayComplete();
+          }
+        });
+      }
 
       td.appendChild(cell);
       tr.appendChild(td);
