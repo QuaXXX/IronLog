@@ -2,9 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0a0a0a">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IRONLOG">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%230a0a0a%22/><text x=%2250%22 y=%2250%22 font-family=%22monospace%22 font-size=%2260%22 fill=%22%233d9a50%22 text-anchor=%22middle%22 dominant-baseline=%22central%22 font-weight=%22bold%22>I</text></svg>">
 <meta name="description" content="IRONLOG — A brutal, tactical daily habit tracker. Track streaks, crush goals, stay disciplined.">
 <title>IRONLOG — Daily Habit Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -152,6 +157,7 @@ header .subtitle {
   overflow: auto;
   padding: 8px 0;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .grid-table {
@@ -400,6 +406,7 @@ tr:hover .delete-btn { opacity: 0.5; }
   overflow-y: auto;
   padding: 16px;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .stats-section {
