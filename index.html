@@ -58,7 +58,7 @@ html, body {
 
 /* ========== HEADER ========== */
 header {
-  padding: 16px 16px 0;
+  padding: calc(16px + env(safe-area-inset-top)) 16px 0;
   flex-shrink: 0;
 }
 
@@ -148,8 +148,12 @@ header .subtitle {
   flex-direction: column;
 }
 
-.view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
-.view.active { display: flex; }
+.view { display: none; flex-direction: column; flex: 1; overflow: hidden; opacity: 0; transform: translateY(10px); }
+.view.active { display: flex; animation: viewEnter 0.3s ease forwards; }
+
+@keyframes viewEnter {
+  to { opacity: 1; transform: translateY(0); }
+}
 
 /* ========== HABIT GRID ========== */
 .grid-wrapper {
@@ -232,8 +236,18 @@ header .subtitle {
 }
 
 /* ========== HABIT ROW ========== */
+.row-enter {
+  animation: rowSlideIn 0.3s ease-out forwards;
+}
+
+@keyframes rowSlideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .grid-table tbody tr {
   border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
 }
 
 .grid-table tbody tr:hover {
@@ -373,6 +387,12 @@ tr:hover .delete-btn { opacity: 0.5; }
 .check-cell.checked::after {
   content: '✓';
   font-weight: 700;
+  animation: checkPulse 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes checkPulse {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 /* ========== ADD HABIT BTN ========== */
@@ -579,6 +599,7 @@ tr:hover .delete-btn { opacity: 0.5; }
   border-top: 1px solid var(--border);
   flex-shrink: 0;
   background: var(--surface);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .nav-btn {
@@ -694,6 +715,12 @@ tr:hover .delete-btn { opacity: 0.5; }
   background: var(--red);
   color: #fff;
   border-color: var(--red);
+}
+
+/* ========== MICRO-INTERACTIONS ========== */
+.month-nav-btn:active, .nav-btn:active, .check-cell:active, #addHabitBtn:active, .delete-btn:active, #exportBtn:active {
+  transform: scale(0.92);
+  transition: transform 0.1s;
 }
 
 /* ========== SCROLLBAR ========== */
@@ -987,6 +1014,8 @@ document.getElementById('confirmDelete').addEventListener('click', () => {
 
 // ========== RENDER GRID ==========
 
+let lastAddedHabitId = null;
+
 function renderGrid() {
   const dates = getMonthDates();
   const todayStr = today();
@@ -1042,6 +1071,10 @@ function renderGrid() {
 
   data.habits.forEach(habit => {
     const tr = document.createElement('tr');
+    if (lastAddedHabitId === habit.id) {
+      tr.classList.add('row-enter');
+      lastAddedHabitId = null;
+    }
 
     // Habit name cell
     const nameTd = document.createElement('td');
@@ -1301,6 +1334,7 @@ function addHabit() {
     createdAt: new Date().toISOString(),
   };
   data.habits.push(habit);
+  lastAddedHabitId = habit.id;
   saveData();
   renderGrid();
 
@@ -1383,25 +1417,25 @@ document.getElementById('exportBtn').addEventListener('click', exportData);
 
 // ========== ELASTIC SCROLL (RUBBERBAND) ==========
 class ElasticScroll {
-  constructor(el) {
-    if (!el) return;
-    this.el = el;
+  constructor(container) {
+    if (!container) return;
+    this.container = container;
     this.startY = 0;
     this.currentY = 0;
     this.isDragging = false;
     this.offsetY = 0;
 
-    this.el.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: true });
-    this.el.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
-    this.el.addEventListener('touchend', this.onTouchEnd.bind(this));
-    this.el.addEventListener('touchcancel', this.onTouchEnd.bind(this));
+    this.container.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: true });
+    this.container.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
+    this.container.addEventListener('touchend', this.onTouchEnd.bind(this));
+    this.container.addEventListener('touchcancel', this.onTouchEnd.bind(this));
   }
 
   onTouchStart(e) {
     this.startY = e.touches[0].clientY;
     this.isDragging = true;
     this.offsetY = 0;
-    this.el.style.transition = 'none';
+    this.container.style.transition = 'none';
   }
 
   onTouchMove(e) {
@@ -1410,27 +1444,31 @@ class ElasticScroll {
     this.currentY = e.touches[0].clientY;
     const deltaY = this.currentY - this.startY;
 
-    const atTop = this.el.scrollTop <= 0;
-    const atBottom = this.el.scrollHeight - this.el.scrollTop <= this.el.clientHeight + 1;
+    let scrollEl = e.target.closest('.grid-wrapper, .stats-scroll');
+    if (!scrollEl) scrollEl = { scrollTop: 0, scrollHeight: 0, clientHeight: 0 };
 
-    if (atTop && deltaY > 0) {
+    const atTop = scrollEl.scrollTop <= 0;
+    const atBottom = scrollEl.scrollHeight - scrollEl.scrollTop <= scrollEl.clientHeight + 1;
+    const noScroll = scrollEl.scrollHeight <= scrollEl.clientHeight;
+
+    if ((atTop || noScroll) && deltaY > 0) {
       if (e.cancelable) e.preventDefault();
       this.offsetY = this.applyResistance(deltaY);
-      this.el.style.transform = `translateY(${this.offsetY}px)`;
-    } else if (atBottom && deltaY < 0) {
+      this.container.style.transform = `translateY(${this.offsetY}px)`;
+    } else if ((atBottom || noScroll) && deltaY < 0) {
       if (e.cancelable) e.preventDefault();
       this.offsetY = -this.applyResistance(Math.abs(deltaY));
-      this.el.style.transform = `translateY(${this.offsetY}px)`;
+      this.container.style.transform = `translateY(${this.offsetY}px)`;
     } else {
-      this.el.style.transform = `translateY(0px)`;
+      this.container.style.transform = `translateY(0px)`;
     }
   }
 
   onTouchEnd() {
     this.isDragging = false;
     if (this.offsetY !== 0) {
-      this.el.style.transition = 'transform 0.4s cubic-bezier(0.25, 1.5, 0.5, 1)';
-      this.el.style.transform = 'translateY(0px)';
+      this.container.style.transition = 'transform 0.4s cubic-bezier(0.25, 1.5, 0.5, 1)';
+      this.container.style.transform = 'translateY(0px)';
       this.offsetY = 0;
     }
   }
@@ -1441,8 +1479,7 @@ class ElasticScroll {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  new ElasticScroll(document.getElementById('gridWrapper'));
-  new ElasticScroll(document.querySelector('.stats-scroll'));
+  new ElasticScroll(document.querySelector('.content'));
 });
 
 // ========== INIT ==========
