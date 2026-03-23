@@ -1499,8 +1499,11 @@ class ElasticScroll {
       return;
     }
 
-    let scrollEl = e.target.closest('.grid-wrapper, .stats-scroll');
-    if (!scrollEl) scrollEl = { scrollTop: 0, scrollHeight: 0, clientHeight: 0 };
+    let scrollEl = e.target.closest('.grid-wrapper');
+    if (!scrollEl) {
+      this.isDragging = false;
+      return;
+    }
 
     const atTop = scrollEl.scrollTop <= 0;
     const atBottom = scrollEl.scrollHeight - scrollEl.scrollTop <= scrollEl.clientHeight + 1;
