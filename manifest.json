@@ -2,7 +2,7 @@
   "name": "IRONLOG",
   "short_name": "IRONLOG",
   "start_url": ".",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
   "description": "Daily Habit Tracker",
