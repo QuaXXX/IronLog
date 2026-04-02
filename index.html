@@ -519,6 +519,115 @@
       padding-bottom: 6px;
     }
 
+    /* Stats view toggle (Monthly / Yearly) */
+    .stats-toggle {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .stats-toggle-btn {
+      flex: 1;
+      background: var(--surface);
+      border: none;
+      color: var(--text-dim);
+      font-family: var(--font);
+      font-size: 11px;
+      padding: 10px;
+      cursor: pointer;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .stats-toggle-btn.active {
+      background: var(--green);
+      color: #000;
+      font-weight: 700;
+    }
+
+    .stats-toggle-btn:not(:last-child) {
+      border-right: 1px solid var(--border);
+    }
+
+    /* Yearly stats */
+    .yearly-month-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      transition: border-color 0.15s;
+    }
+
+    .yearly-month-card:hover {
+      border-color: var(--green-dim);
+    }
+
+    .yearly-month-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .yearly-month-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .yearly-month-pct {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--green-bright);
+    }
+
+    .yearly-mini-bar {
+      height: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .yearly-mini-bar-fill {
+      height: 100%;
+      background: var(--green);
+      transition: width 0.4s ease;
+    }
+
+    .yearly-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .yearly-summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 14px 10px;
+      text-align: center;
+    }
+
+    .yearly-summary-card .ysc-num {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1;
+    }
+
+    .yearly-summary-card .ysc-label {
+      font-size: 8px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
     .bar-chart-item {
       display: flex;
       align-items: center;
@@ -917,28 +1026,57 @@
       <!-- STATS VIEW -->
       <div class="view" id="statsView">
         <div class="stats-scroll">
-          <div class="stats-section">
-            <h2>Overall Completion</h2>
-            <div class="overall-rate" id="overallRate">
-              <div class="big-num">0%</div>
-              <div class="big-label">This month</div>
+          <!-- Toggle: Monthly / Yearly -->
+          <div class="stats-toggle">
+            <button class="stats-toggle-btn active" id="statsMonthlyBtn" data-stats-view="monthly">Monthly</button>
+            <button class="stats-toggle-btn" id="statsYearlyBtn" data-stats-view="yearly">Yearly</button>
+          </div>
+
+          <!-- Monthly Stats Panel -->
+          <div id="statsMonthlyPanel">
+            <div class="stats-section">
+              <h2>Overall Completion</h2>
+              <div class="overall-rate" id="overallRate">
+                <div class="big-num">0%</div>
+                <div class="big-label">This month</div>
+              </div>
+            </div>
+            <div class="stats-section">
+              <h2>Monthly Completion</h2>
+              <div id="weeklyBars"></div>
+            </div>
+            <div class="stats-section">
+              <h2>Best Streaks</h2>
+              <div id="bestStreaks"></div>
+            </div>
+            <div class="stats-section">
+              <h2>Monthly Heatmap</h2>
+              <div class="heatmap-label-row">
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+              </div>
+              <div class="heatmap-grid" id="heatmapGrid"></div>
             </div>
           </div>
-          <div class="stats-section">
-            <h2>Monthly Completion</h2>
-            <div id="weeklyBars"></div>
-          </div>
-          <div class="stats-section">
-            <h2>Best Streaks</h2>
-            <div id="bestStreaks"></div>
-          </div>
-          <div class="stats-section">
-            <h2>Monthly Heatmap</h2>
-            <div class="heatmap-label-row">
-              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+
+          <!-- Yearly Stats Panel -->
+          <div id="statsYearlyPanel" style="display:none;">
+            <div class="stats-section">
+              <h2 id="yearlyTitle">2026 Overview</h2>
+              <div class="yearly-summary" id="yearlySummary"></div>
             </div>
-            <div class="heatmap-grid" id="heatmapGrid"></div>
+            <div class="stats-section">
+              <h2>Month by Month</h2>
+              <div id="yearlyMonths"></div>
+            </div>
+            <div class="stats-section">
+              <h2>Yearly Heatmap</h2>
+              <div class="heatmap-label-row">
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+              </div>
+              <div class="heatmap-grid" id="yearlyHeatmapGrid"></div>
+            </div>
           </div>
+
           <div style="margin-top:16px;">
             <button id="exportBtn">↓ Export Data (.json)</button>
           </div>
@@ -1042,10 +1180,15 @@
       if (raw) {
         try {
           const d = JSON.parse(raw);
-          return { habits: d.habits || [], checks: d.checks || {}, shownMilestones: d.shownMilestones || {} };
+          return {
+            habits: d.habits || [],
+            checks: d.checks || {},
+            shownMilestones: d.shownMilestones || {},
+            quoteHistory: d.quoteHistory || []
+          };
         } catch { /* corrupted */ }
       }
-      return { habits: DEFAULT_HABITS, checks: {}, shownMilestones: {} };
+      return { habits: DEFAULT_HABITS, checks: {}, shownMilestones: {}, quoteHistory: [] };
     }
 
     function saveData() {
@@ -1298,8 +1441,48 @@
     function renderQuote() {
       const el = document.getElementById('quoteFooter');
       if (!el) return;
-      const num = new Date().getDate() + (new Date().getMonth() * 31);
-      const selected = QUOTES[num % QUOTES.length];
+
+      const todayStr = fmtDate(new Date());
+
+      // Check if we already picked a quote for today
+      if (!data.quoteHistory) data.quoteHistory = [];
+
+      const todayEntry = data.quoteHistory.find(e => e.date === todayStr);
+      if (todayEntry) {
+        // Already picked for today, just show it
+        const selected = QUOTES[todayEntry.index] || QUOTES[0];
+        el.innerHTML = `"${selected.q}"<span class="quote-author">— ${selected.a}</span>`;
+        return;
+      }
+
+      // Build set of recently used quote indices (last 30 days)
+      const recentIndices = new Set();
+      data.quoteHistory.forEach(e => recentIndices.add(e.index));
+
+      // Get available quote indices (not used in last 30 entries)
+      let available = [];
+      for (let i = 0; i < QUOTES.length; i++) {
+        if (!recentIndices.has(i)) available.push(i);
+      }
+
+      // If all quotes used recently, reset and allow all
+      if (available.length === 0) {
+        available = QUOTES.map((_, i) => i);
+      }
+
+      // Pick a random quote from available
+      const randomIdx = available[Math.floor(Math.random() * available.length)];
+
+      // Record it in history
+      data.quoteHistory.push({ date: todayStr, index: randomIdx });
+
+      // Keep only last 30 entries
+      if (data.quoteHistory.length > 30) {
+        data.quoteHistory = data.quoteHistory.slice(-30);
+      }
+      saveData();
+
+      const selected = QUOTES[randomIdx];
       el.innerHTML = `"${selected.q}"<span class="quote-author">— ${selected.a}</span>`;
     }
 
@@ -1640,11 +1823,21 @@
 
     // ========== STATS ==========
 
+    let statsViewMode = 'monthly'; // 'monthly' or 'yearly'
+
     function renderStats() {
-      renderMonthlyBars();
-      renderBestStreaks();
-      renderHeatmap();
-      renderOverallRate();
+      if (statsViewMode === 'monthly') {
+        document.getElementById('statsMonthlyPanel').style.display = '';
+        document.getElementById('statsYearlyPanel').style.display = 'none';
+        renderMonthlyBars();
+        renderBestStreaks();
+        renderHeatmap();
+        renderOverallRate();
+      } else {
+        document.getElementById('statsMonthlyPanel').style.display = 'none';
+        document.getElementById('statsYearlyPanel').style.display = '';
+        renderYearlyStats();
+      }
     }
 
     function renderMonthlyBars() {
@@ -1761,6 +1954,160 @@
   `;
     }
 
+    // ========== YEARLY STATS ==========
+
+    function renderYearlyStats() {
+      const todayDate = new Date();
+      const year = todayDate.getFullYear();
+      const todayStr = today();
+
+      document.getElementById('yearlyTitle').textContent = `${year} Overview`;
+
+      // Calculate summary stats
+      let totalChecks = 0;
+      let totalPossible = 0;
+      let bestMonthPct = 0;
+      let bestMonthName = '';
+      let totalDaysActive = 0;
+
+      const monthData = [];
+
+      for (let m = 0; m < 12; m++) {
+        const dim = daysInMonth(year, m);
+        const dates = [];
+        for (let d = 1; d <= dim; d++) {
+          const dt = new Date(year, m, d);
+          const ds = fmtDate(dt);
+          if (ds <= todayStr) dates.push(ds);
+        }
+
+        if (dates.length === 0) {
+          monthData.push({ month: m, pct: -1, done: 0, total: 0 });
+          continue;
+        }
+
+        let done = 0, total = 0;
+        data.habits.forEach(habit => {
+          dates.forEach(ds => {
+            total++;
+            if (isChecked(habit.id, ds)) done++;
+          });
+        });
+
+        totalChecks += done;
+        totalPossible += total;
+
+        // Count active days (at least 1 check)
+        dates.forEach(ds => {
+          const anyDone = data.habits.some(h => isChecked(h.id, ds));
+          if (anyDone) totalDaysActive++;
+        });
+
+        const pct = total ? Math.round((done / total) * 100) : 0;
+        if (pct > bestMonthPct) {
+          bestMonthPct = pct;
+          bestMonthName = MONTHS[m].substring(0, 3);
+        }
+
+        monthData.push({ month: m, pct, done, total });
+      }
+
+      const overallPct = totalPossible ? Math.round((totalChecks / totalPossible) * 100) : 0;
+
+      // Summary cards
+      const summaryContainer = document.getElementById('yearlySummary');
+      summaryContainer.innerHTML = `
+        <div class="yearly-summary-card">
+          <div class="ysc-num">${overallPct}%</div>
+          <div class="ysc-label">Year Rate</div>
+        </div>
+        <div class="yearly-summary-card">
+          <div class="ysc-num">${totalDaysActive}</div>
+          <div class="ysc-label">Active Days</div>
+        </div>
+        <div class="yearly-summary-card">
+          <div class="ysc-num">${bestMonthName || '—'}</div>
+          <div class="ysc-label">Best Month</div>
+        </div>
+      `;
+
+      // Month-by-month cards
+      const monthsContainer = document.getElementById('yearlyMonths');
+      monthsContainer.innerHTML = '';
+
+      monthData.forEach(md => {
+        if (md.pct === -1) return; // future month, skip
+        const card = document.createElement('div');
+        card.className = 'yearly-month-card';
+        card.innerHTML = `
+          <div class="yearly-month-header">
+            <span class="yearly-month-name">${MONTHS[md.month]}</span>
+            <span class="yearly-month-pct">${md.pct}%</span>
+          </div>
+          <div class="yearly-mini-bar">
+            <div class="yearly-mini-bar-fill" style="width:${md.pct}%"></div>
+          </div>
+        `;
+        monthsContainer.appendChild(card);
+      });
+
+      if (monthsContainer.children.length === 0) {
+        monthsContainer.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">No data yet</div>';
+      }
+
+      // Yearly heatmap
+      renderYearlyHeatmap(year);
+    }
+
+    function renderYearlyHeatmap(year) {
+      const container = document.getElementById('yearlyHeatmapGrid');
+      container.innerHTML = '';
+      const todayDate = new Date();
+
+      // Start from Jan 1, find the Monday before or on Jan 1
+      const jan1 = new Date(year, 0, 1);
+      const startDay = new Date(jan1);
+      const dow = startDay.getDay();
+      const mondayOffset = dow === 0 ? 6 : dow - 1;
+      startDay.setDate(startDay.getDate() - mondayOffset);
+
+      // Go to Dec 31 then fill to end of that week
+      const dec31 = new Date(year, 11, 31);
+
+      let current = new Date(startDay);
+      let cellCount = 0;
+
+      while (current <= dec31 || current.getDay() !== 1) {
+        const dateStr = fmtDate(current);
+        const isInYear = current.getFullYear() === year;
+        const doneH = data.habits.filter(h => isChecked(h.id, dateStr)).length;
+        const totalH = data.habits.length || 1;
+        const ratio = doneH / totalH;
+
+        const cell = document.createElement('div');
+        cell.className = 'heatmap-cell';
+        cell.style.aspectRatio = '1';
+        if (ratio > 0 && ratio <= 0.25) cell.classList.add('lvl-1');
+        else if (ratio > 0.25 && ratio <= 0.5) cell.classList.add('lvl-2');
+        else if (ratio > 0.5 && ratio <= 0.75) cell.classList.add('lvl-3');
+        else if (ratio > 0.75) cell.classList.add('lvl-4');
+
+        if (!isInYear) cell.style.opacity = '0.1';
+        else if (current > todayDate) cell.style.opacity = '0.15';
+
+        const tip = document.createElement('span');
+        tip.className = 'tooltip';
+        tip.textContent = `${MONTHS[current.getMonth()].substring(0, 3)} ${current.getDate()}: ${doneH}/${data.habits.length}`;
+        cell.appendChild(tip);
+
+        container.appendChild(cell);
+        current.setDate(current.getDate() + 1);
+        cellCount++;
+
+        if (cellCount >= 371) break; // 53 weeks max
+      }
+    }
+
     // ========== NAV ==========
 
     function switchView(viewId) {
@@ -1862,6 +2209,16 @@
       btn.addEventListener('click', () => switchView(btn.dataset.view));
     });
 
+    // Stats toggle (Monthly / Yearly)
+    document.querySelectorAll('.stats-toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.stats-toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        statsViewMode = btn.dataset.statsView;
+        renderStats();
+      });
+    });
+
     // Add habit
     document.getElementById('addHabitBtn').addEventListener('click', addHabit);
 
@@ -1959,6 +2316,46 @@
     document.addEventListener('DOMContentLoaded', () => {
       new ElasticScroll(document.querySelector('.content'));
     });
+
+    // ========== SWIPE NAVIGATION ==========
+    (function initSwipeNav() {
+      const appEl = document.getElementById('app');
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchEndX = 0;
+      let touchEndY = 0;
+      let swiping = false;
+
+      const views = ['todayView', 'statsView'];
+
+      appEl.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+        swiping = true;
+      }, { passive: true });
+
+      appEl.addEventListener('touchend', (e) => {
+        if (!swiping) return;
+        swiping = false;
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+
+        // Only handle horizontal swipes where horizontal movement dominates
+        if (Math.abs(deltaX) < 60 || Math.abs(deltaY) > Math.abs(deltaX) * 0.7) return;
+
+        const currentIdx = views.indexOf(currentView);
+        if (deltaX < 0 && currentIdx < views.length - 1) {
+          // Swipe left → go to next view
+          switchView(views[currentIdx + 1]);
+        } else if (deltaX > 0 && currentIdx > 0) {
+          // Swipe right → go to previous view
+          switchView(views[currentIdx - 1]);
+        }
+      }, { passive: true });
+    })();
 
     // ========== INIT ==========
     needsScrollToToday = true;
