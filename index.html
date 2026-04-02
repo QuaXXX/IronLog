@@ -496,34 +496,42 @@
       border-color: var(--green-dim);
     }
 
-    /* ========== STATS VIEW ========== */
+    /* ========== STATS VIEW — FULL REVAMP ========== */
     .stats-scroll {
       flex: 1;
       overflow-y: auto;
-      padding: 16px;
+      padding: 14px;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
     }
 
     .stats-section {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .stats-section h2 {
-      font-size: 11px;
-      letter-spacing: 2px;
+      font-size: 9px;
+      letter-spacing: 3px;
       text-transform: uppercase;
       color: var(--green);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
+      padding-bottom: 5px;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    /* Stats view toggle (Monthly / Yearly) */
+    .stats-section h2 .section-icon {
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    /* Stats view toggle */
     .stats-toggle {
       display: flex;
       gap: 0;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       border: 1px solid var(--border);
       overflow: hidden;
     }
@@ -534,8 +542,8 @@
       border: none;
       color: var(--text-dim);
       font-family: var(--font);
-      font-size: 11px;
-      padding: 10px;
+      font-size: 10px;
+      padding: 9px;
       cursor: pointer;
       letter-spacing: 2px;
       text-transform: uppercase;
@@ -552,121 +560,266 @@
       border-right: 1px solid var(--border);
     }
 
-    /* Yearly stats */
-    .yearly-month-card {
+    /* ---- DISCIPLINE SCORE (top card) ---- */
+    .disc-score-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      padding: 12px 14px;
-      margin-bottom: 8px;
-      transition: border-color 0.15s;
-    }
-
-    .yearly-month-card:hover {
-      border-color: var(--green-dim);
-    }
-
-    .yearly-month-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .yearly-month-name {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-
-    .yearly-month-pct {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--green-bright);
-    }
-
-    .yearly-mini-bar {
-      height: 6px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
+      padding: 20px 16px;
+      text-align: center;
+      position: relative;
       overflow: hidden;
     }
 
-    .yearly-mini-bar-fill {
-      height: 100%;
+    .disc-score-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
       background: var(--green);
-      transition: width 0.4s ease;
     }
 
-    .yearly-summary {
+    .disc-grade {
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 4px;
+    }
+
+    .disc-grade.grade-s { color: #4ec463; text-shadow: 0 0 20px rgba(78, 196, 99, 0.3); }
+    .disc-grade.grade-a { color: #3d9a50; }
+    .disc-grade.grade-b { color: #7aa844; }
+    .disc-grade.grade-c { color: #c4a833; }
+    .disc-grade.grade-d { color: #c47833; }
+    .disc-grade.grade-f { color: #c0392b; }
+
+    .disc-pct {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+
+    .disc-verdict {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 10px;
+      padding: 6px 12px;
+      display: inline-block;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .disc-verdict.v-elite { color: #4ec463; border-color: #4ec463; }
+    .disc-verdict.v-solid { color: #3d9a50; border-color: #3d9a50; }
+    .disc-verdict.v-decent { color: #7aa844; border-color: #7aa844; }
+    .disc-verdict.v-mid { color: #c4a833; border-color: #c4a833; }
+    .disc-verdict.v-weak { color: #c47833; border-color: #c47833; }
+    .disc-verdict.v-failing { color: #c0392b; border-color: #c0392b; }
+
+    /* ---- STAT TILES (2-col grid) ---- */
+    .stat-tiles {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 20px;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
     }
 
-    .yearly-summary-card {
+    .stat-tile {
       background: var(--surface);
       border: 1px solid var(--border);
-      padding: 14px 10px;
+      padding: 12px 10px;
       text-align: center;
     }
 
-    .yearly-summary-card .ysc-num {
-      font-size: 24px;
+    .stat-tile .st-num {
+      font-size: 22px;
       font-weight: 700;
       color: var(--green);
       line-height: 1;
     }
 
-    .yearly-summary-card .ysc-label {
+    .stat-tile .st-num.st-red { color: #c0392b; }
+    .stat-tile .st-num.st-yellow { color: #c4a833; }
+    .stat-tile .st-num.st-bright { color: #4ec463; }
+
+    .stat-tile .st-label {
       font-size: 8px;
       color: var(--text-dim);
       letter-spacing: 1px;
       text-transform: uppercase;
-      margin-top: 4px;
+      margin-top: 3px;
     }
 
-    .bar-chart-item {
+    /* ---- MOMENTUM CHART (weekly bars) ---- */
+    .momentum-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 80px;
+      padding: 0 2px;
+    }
+
+    .momentum-bar-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .momentum-bar {
+      width: 100%;
+      min-height: 2px;
+      background: var(--green-dim);
+      transition: height 0.4s ease;
+      position: relative;
+    }
+
+    .momentum-bar.bar-hot { background: #4ec463; }
+    .momentum-bar.bar-warm { background: #3d9a50; }
+    .momentum-bar.bar-cool { background: #7aa844; }
+    .momentum-bar.bar-cold { background: #c4a833; }
+    .momentum-bar.bar-ice { background: #c0392b; }
+    .momentum-bar.bar-current {
+      border: 1px solid #4ec463;
+      box-shadow: 0 0 6px rgba(78, 196, 99, 0.2);
+    }
+
+    .momentum-label {
+      font-size: 7px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      text-align: center;
+      letter-spacing: 0;
+    }
+
+    .momentum-trend {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    .momentum-trend .trend-up { color: #4ec463; }
+    .momentum-trend .trend-down { color: #c0392b; }
+    .momentum-trend .trend-flat { color: #c4a833; }
+
+    /* ---- HABIT INTEL ---- */
+    .habit-intel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
+      gap: 10px;
     }
 
-    .bar-label {
-      width: 100px;
-      font-size: 11px;
-      color: var(--text-dim);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .hi-status-pip {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
       flex-shrink: 0;
     }
 
-    .bar-track {
+    .hi-status-pip.pip-dominant { background: #4ec463; box-shadow: 0 0 6px rgba(78,196,99,0.4); }
+    .hi-status-pip.pip-solid { background: #3d9a50; }
+    .hi-status-pip.pip-slacking { background: #c4a833; }
+    .hi-status-pip.pip-awol { background: #c0392b; }
+
+    .hi-info {
       flex: 1;
-      height: 14px;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      min-width: 0;
+    }
+
+    .hi-name {
+      font-size: 11px;
+      color: var(--text);
+      white-space: nowrap;
       overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .bar-fill {
-      height: 100%;
-      background: var(--green);
-      transition: width 0.4s ease;
-    }
-
-    .bar-pct {
-      font-size: 10px;
+    .hi-meta {
+      font-size: 8px;
       color: var(--text-dim);
-      width: 36px;
+      margin-top: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    .hi-right {
       text-align: right;
       flex-shrink: 0;
     }
 
+    .hi-pct {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .hi-pct.pct-high { color: #4ec463; }
+    .hi-pct.pct-mid { color: #c4a833; }
+    .hi-pct.pct-low { color: #c0392b; }
+
+    .hi-rank {
+      font-size: 7px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    .hi-rank.rank-dominant { color: #4ec463; }
+    .hi-rank.rank-solid { color: #3d9a50; }
+    .hi-rank.rank-slacking { color: #c4a833; }
+    .hi-rank.rank-awol { color: #c0392b; }
+
+    /* ---- WEAK POINTS ---- */
+    .weak-points-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .weak-point-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-left: 3px solid #c0392b;
+    }
+
+    .weak-point-card.wp-warn {
+      border-left-color: #c4a833;
+    }
+
+    .wp-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+      opacity: 0.8;
+    }
+
+    .wp-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .wp-title {
+      font-size: 10px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .wp-detail {
+      font-size: 8px;
+      color: var(--text-dim);
+      margin-top: 1px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ---- HEATMAP (kept but refined) ---- */
     .heatmap-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -680,25 +833,10 @@
       position: relative;
     }
 
-    .heatmap-cell.lvl-1 {
-      background: rgba(61, 154, 80, 0.2);
-      border-color: rgba(61, 154, 80, 0.3);
-    }
-
-    .heatmap-cell.lvl-2 {
-      background: rgba(61, 154, 80, 0.4);
-      border-color: rgba(61, 154, 80, 0.5);
-    }
-
-    .heatmap-cell.lvl-3 {
-      background: rgba(61, 154, 80, 0.6);
-      border-color: rgba(61, 154, 80, 0.7);
-    }
-
-    .heatmap-cell.lvl-4 {
-      background: rgba(61, 154, 80, 0.85);
-      border-color: var(--green);
-    }
+    .heatmap-cell.lvl-1 { background: rgba(61, 154, 80, 0.2); border-color: rgba(61, 154, 80, 0.3); }
+    .heatmap-cell.lvl-2 { background: rgba(61, 154, 80, 0.4); border-color: rgba(61, 154, 80, 0.5); }
+    .heatmap-cell.lvl-3 { background: rgba(61, 154, 80, 0.6); border-color: rgba(61, 154, 80, 0.7); }
+    .heatmap-cell.lvl-4 { background: rgba(61, 154, 80, 0.85); border-color: var(--green); }
 
     .heatmap-label-row {
       display: grid;
@@ -708,7 +846,7 @@
     }
 
     .heatmap-label-row span {
-      font-size: 9px;
+      font-size: 8px;
       color: var(--text-dim);
       text-align: center;
       text-transform: uppercase;
@@ -730,51 +868,127 @@
       pointer-events: none;
     }
 
-    .heatmap-cell:hover .tooltip {
-      display: block;
+    .heatmap-cell:hover .tooltip { display: block; }
+
+    /* ---- DAY-OF-WEEK CHART ---- */
+    .dow-chart {
+      display: flex;
+      gap: 4px;
     }
 
-    .streak-stat-row {
+    .dow-bar-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .dow-bar-track {
+      width: 100%;
+      height: 50px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+    }
+
+    .dow-bar-fill {
+      width: 100%;
+      background: var(--green-dim);
+      transition: height 0.4s ease;
+    }
+
+    .dow-bar-fill.dow-best { background: #4ec463; }
+    .dow-bar-fill.dow-worst { background: #c0392b; }
+
+    .dow-label {
+      font-size: 8px;
+      color: var(--text-dim);
+      margin-top: 3px;
+      text-transform: uppercase;
+    }
+
+    .dow-pct {
+      font-size: 7px;
+      color: var(--text-dim);
+      margin-top: 1px;
+    }
+
+    /* ---- YEARLY VIEW ---- */
+    .yearly-month-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      transition: border-color 0.15s;
+    }
+
+    .yearly-month-card:hover { border-color: var(--green-dim); }
+
+    .yearly-month-header {
       display: flex;
       justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 12px;
+      align-items: center;
+      margin-bottom: 6px;
     }
 
-    .streak-stat-row .sname {
-      color: var(--text-dim);
-      max-width: 50%;
+    .yearly-month-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .yearly-month-pct {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .yearly-mini-bar {
+      height: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
       overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
-    .streak-stat-row .sval {
-      color: var(--green-bright);
-      font-weight: 600;
+    .yearly-mini-bar-fill {
+      height: 100%;
+      background: var(--green);
+      transition: width 0.4s ease;
     }
 
-    .overall-rate {
+    .yearly-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .yearly-summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px 8px;
       text-align: center;
-      padding: 20px 0;
     }
 
-    .overall-rate .big-num {
-      font-size: 48px;
+    .yearly-summary-card .ysc-num {
+      font-size: 22px;
       font-weight: 700;
       color: var(--green);
       line-height: 1;
     }
 
-    .overall-rate .big-label {
-      font-size: 10px;
+    .yearly-summary-card .ysc-label {
+      font-size: 7px;
       color: var(--text-dim);
-      letter-spacing: 2px;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      margin-top: 4px;
+      margin-top: 3px;
     }
 
+    /* ---- EXPORT ---- */
     #exportBtn {
       width: 100%;
       background: var(--surface);
@@ -794,6 +1008,24 @@
       color: var(--green);
       background: var(--surface2);
     }
+
+    /* ---- ANIMATIONS ---- */
+    @keyframes statFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-animate {
+      animation: statFadeIn 0.3s ease forwards;
+    }
+
+    .stat-animate:nth-child(2) { animation-delay: 0.05s; }
+    .stat-animate:nth-child(3) { animation-delay: 0.1s; }
+    .stat-animate:nth-child(4) { animation-delay: 0.15s; }
+    .stat-animate:nth-child(5) { animation-delay: 0.2s; }
+    .stat-animate:nth-child(6) { animation-delay: 0.25s; }
+    .stat-animate:nth-child(7) { animation-delay: 0.3s; }
+    .stat-animate:nth-child(8) { animation-delay: 0.35s; }
 
     /* ========== BOTTOM NAV ========== */
     .bottom-nav {
@@ -1023,7 +1255,8 @@
         <div class="quote-footer" id="quoteFooter"></div>
       </div>
 
-      <!-- STATS VIEW -->
+
+      <!-- STATS VIEW — REVAMPED -->
       <div class="view" id="statsView">
         <div class="stats-scroll">
           <!-- Toggle: Monthly / Yearly -->
@@ -1032,25 +1265,35 @@
             <button class="stats-toggle-btn" id="statsYearlyBtn" data-stats-view="yearly">Yearly</button>
           </div>
 
-          <!-- Monthly Stats Panel -->
+          <!-- ===== MONTHLY PANEL ===== -->
           <div id="statsMonthlyPanel">
-            <div class="stats-section">
-              <h2>Overall Completion</h2>
-              <div class="overall-rate" id="overallRate">
-                <div class="big-num">0%</div>
-                <div class="big-label">This month</div>
-              </div>
+            <div class="stats-section stat-animate">
+              <h2><span class="section-icon">◆</span> Discipline Score</h2>
+              <div class="disc-score-card" id="discScoreCard"></div>
             </div>
-            <div class="stats-section">
-              <h2>Monthly Completion</h2>
-              <div id="weeklyBars"></div>
+            <div class="stats-section stat-animate">
+              <h2><span class="section-icon">▪</span> Raw Numbers</h2>
+              <div class="stat-tiles" id="statTiles"></div>
             </div>
-            <div class="stats-section">
-              <h2>Best Streaks</h2>
-              <div id="bestStreaks"></div>
+            <div class="stats-section stat-animate">
+              <h2><span class="section-icon">▸</span> Weekly Momentum</h2>
+              <div class="momentum-chart" id="momentumChart"></div>
+              <div class="momentum-trend" id="momentumTrend"></div>
             </div>
-            <div class="stats-section">
-              <h2>Monthly Heatmap</h2>
+            <div class="stats-section stat-animate">
+              <h2><span class="section-icon">◎</span> Habit Intel Report</h2>
+              <div id="habitIntel"></div>
+            </div>
+            <div class="stats-section stat-animate">
+              <h2><span class="section-icon">⚠</span> Weak Points</h2>
+              <div class="weak-points-grid" id="weakPoints"></div>
+            </div>
+            <div class="stats-section stat-animate">
+              <h2><span class="section-icon">▦</span> Day Breakdown</h2>
+              <div class="dow-chart" id="dowChart"></div>
+            </div>
+            <div class="stats-section stat-animate">
+              <h2><span class="section-icon">▥</span> Operations Heatmap</h2>
               <div class="heatmap-label-row">
                 <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
               </div>
@@ -1058,18 +1301,18 @@
             </div>
           </div>
 
-          <!-- Yearly Stats Panel -->
+          <!-- ===== YEARLY PANEL ===== -->
           <div id="statsYearlyPanel" style="display:none;">
-            <div class="stats-section">
-              <h2 id="yearlyTitle">2026 Overview</h2>
+            <div class="stats-section stat-animate">
+              <h2><span class="section-icon">◆</span> <span id="yearlyTitle">2026 Overview</span></h2>
               <div class="yearly-summary" id="yearlySummary"></div>
             </div>
-            <div class="stats-section">
-              <h2>Month by Month</h2>
+            <div class="stats-section stat-animate">
+              <h2><span class="section-icon">▸</span> Month by Month</h2>
               <div id="yearlyMonths"></div>
             </div>
-            <div class="stats-section">
-              <h2>Yearly Heatmap</h2>
+            <div class="stats-section stat-animate">
+              <h2><span class="section-icon">▥</span> Year Heatmap</h2>
               <div class="heatmap-label-row">
                 <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
               </div>
@@ -1821,18 +2064,21 @@
       wrapper.scrollLeft = Math.max(0, scrollTarget);
     }
 
-    // ========== STATS ==========
+    // ========== STATS — REVAMPED ==========
 
-    let statsViewMode = 'monthly'; // 'monthly' or 'yearly'
+    let statsViewMode = 'monthly';
 
     function renderStats() {
       if (statsViewMode === 'monthly') {
         document.getElementById('statsMonthlyPanel').style.display = '';
         document.getElementById('statsYearlyPanel').style.display = 'none';
-        renderMonthlyBars();
-        renderBestStreaks();
+        renderDiscScore();
+        renderStatTiles();
+        renderMomentum();
+        renderHabitIntel();
+        renderWeakPoints();
+        renderDowChart();
         renderHeatmap();
-        renderOverallRate();
       } else {
         document.getElementById('statsMonthlyPanel').style.display = 'none';
         document.getElementById('statsYearlyPanel').style.display = '';
@@ -1840,51 +2086,323 @@
       }
     }
 
-    function renderMonthlyBars() {
-      const container = document.getElementById('weeklyBars');
-      container.innerHTML = '';
-      const dates = getMonthDates();
-      // Only count up to today
+    // ---- Helpers ----
+    function getMonthPct(year, month) {
       const todayStr = today();
-      const validDates = dates.filter(d => d <= todayStr);
+      const dim = daysInMonth(year, month);
+      const dates = [];
+      for (let d = 1; d <= dim; d++) {
+        const ds = fmtDate(new Date(year, month, d));
+        if (ds <= todayStr) dates.push(ds);
+      }
+      if (!dates.length || !data.habits.length) return 0;
+      let done = 0, total = 0;
+      data.habits.forEach(h => { dates.forEach(ds => { total++; if (isChecked(h.id, ds)) done++; }); });
+      return total ? Math.round((done / total) * 100) : 0;
+    }
 
-      data.habits.forEach(habit => {
-        const completed = validDates.filter(d => isChecked(habit.id, d)).length;
-        const total = validDates.length || 1;
-        const pct = Math.round((completed / total) * 100);
+    function getWeekPct(startDate) {
+      const todayStr = today();
+      const dates = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + i);
+        const ds = fmtDate(d);
+        if (ds <= todayStr) dates.push(ds);
+      }
+      if (!dates.length || !data.habits.length) return -1;
+      let done = 0, total = 0;
+      data.habits.forEach(h => { dates.forEach(ds => { total++; if (isChecked(h.id, ds)) done++; }); });
+      return total ? Math.round((done / total) * 100) : 0;
+    }
 
-        const item = document.createElement('div');
-        item.className = 'bar-chart-item';
-        item.innerHTML = `
-      <span class="bar-label">${escHtml(habit.name)}</span>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-      <span class="bar-pct">${pct}%</span>
-    `;
-        container.appendChild(item);
+    function getGrade(pct) {
+      if (pct >= 95) return { grade: 'S', cls: 'grade-s', verdict: 'MACHINE MODE', vcls: 'v-elite' };
+      if (pct >= 85) return { grade: 'A', cls: 'grade-a', verdict: 'LOCKED IN', vcls: 'v-solid' };
+      if (pct >= 70) return { grade: 'B', cls: 'grade-b', verdict: 'SOLID EFFORT', vcls: 'v-decent' };
+      if (pct >= 50) return { grade: 'C', cls: 'grade-c', verdict: 'ROOM TO GROW', vcls: 'v-mid' };
+      if (pct >= 30) return { grade: 'D', cls: 'grade-d', verdict: 'FALLING BEHIND', vcls: 'v-weak' };
+      return { grade: 'F', cls: 'grade-f', verdict: 'WAKE UP', vcls: 'v-failing' };
+    }
+
+    function getHabitRank(pct) {
+      if (pct >= 85) return { label: 'DOMINANT', pip: 'pip-dominant', rank: 'rank-dominant', pctCls: 'pct-high' };
+      if (pct >= 60) return { label: 'SOLID', pip: 'pip-solid', rank: 'rank-solid', pctCls: 'pct-high' };
+      if (pct >= 30) return { label: 'SLACKING', pip: 'pip-slacking', rank: 'rank-slacking', pctCls: 'pct-mid' };
+      return { label: 'AWOL', pip: 'pip-awol', rank: 'rank-awol', pctCls: 'pct-low' };
+    }
+
+    // ---- 1. DISCIPLINE SCORE ----
+    function renderDiscScore() {
+      const el = document.getElementById('discScoreCard');
+      const todayStr = today();
+      const dates = getMonthDates().filter(d => d <= todayStr);
+      let total = 0, done = 0;
+      data.habits.forEach(h => { dates.forEach(ds => { total++; if (isChecked(h.id, ds)) done++; }); });
+      const pct = total ? Math.round((done / total) * 100) : 0;
+      const g = getGrade(pct);
+      el.innerHTML = `
+        <div class="disc-grade ${g.cls}">${g.grade}</div>
+        <div class="disc-pct">${pct}% completion — ${MONTHS[viewMonth]} ${viewYear}</div>
+        <div class="disc-verdict ${g.vcls}">${g.verdict}</div>
+      `;
+    }
+
+    // ---- 2. RAW NUMBERS ----
+    function renderStatTiles() {
+      const el = document.getElementById('statTiles');
+      const todayStr = today();
+      const dates = getMonthDates().filter(d => d <= todayStr);
+      let totalChecks = 0, totalMisses = 0, perfectDays = 0, zeroDays = 0;
+
+      dates.forEach(ds => {
+        const doneCount = data.habits.filter(h => isChecked(h.id, ds)).length;
+        totalChecks += doneCount;
+        totalMisses += data.habits.length - doneCount;
+        if (doneCount === data.habits.length && data.habits.length > 0) perfectDays++;
+        if (doneCount === 0 && data.habits.length > 0) zeroDays++;
       });
 
-      if (!data.habits.length) {
-        container.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">No habits yet</div>';
+      el.innerHTML = `
+        <div class="stat-tile"><div class="st-num st-bright">${totalChecks}</div><div class="st-label">Checks Done</div></div>
+        <div class="stat-tile"><div class="st-num st-red">${totalMisses}</div><div class="st-label">Missed</div></div>
+        <div class="stat-tile"><div class="st-num st-bright">${perfectDays}</div><div class="st-label">Perfect Days</div></div>
+        <div class="stat-tile"><div class="st-num ${zeroDays > 0 ? 'st-red' : ''} ">${zeroDays}</div><div class="st-label">Zero Days</div></div>
+      `;
+    }
+
+    // ---- 3. MOMENTUM ----
+    function renderMomentum() {
+      const chart = document.getElementById('momentumChart');
+      const trend = document.getElementById('momentumTrend');
+      chart.innerHTML = '';
+
+      // Get last 8 weeks ending with current week
+      const todayDate = new Date();
+      const todayDay = todayDate.getDay();
+      // Find Monday of current week
+      const monday = new Date(todayDate);
+      monday.setDate(monday.getDate() - (todayDay === 0 ? 6 : todayDay - 1));
+      monday.setHours(0,0,0,0);
+
+      const weeks = [];
+      for (let w = 7; w >= 0; w--) {
+        const weekStart = new Date(monday);
+        weekStart.setDate(weekStart.getDate() - (w * 7));
+        const pct = getWeekPct(weekStart);
+        const mLabel = MONTHS[weekStart.getMonth()].substring(0, 3);
+        const dLabel = weekStart.getDate();
+        weeks.push({ pct, label: `${mLabel} ${dLabel}`, isCurrent: w === 0 });
+      }
+
+      const validWeeks = weeks.filter(w => w.pct >= 0);
+      const maxPct = Math.max(...validWeeks.map(w => w.pct), 1);
+
+      weeks.forEach(w => {
+        if (w.pct < 0) return; // skip fully future weeks
+        const barH = Math.max(2, (w.pct / 100) * 100);
+        let barClass = '';
+        if (w.pct >= 85) barClass = 'bar-hot';
+        else if (w.pct >= 70) barClass = 'bar-warm';
+        else if (w.pct >= 50) barClass = 'bar-cool';
+        else if (w.pct >= 30) barClass = 'bar-cold';
+        else barClass = 'bar-ice';
+        if (w.isCurrent) barClass += ' bar-current';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'momentum-bar-wrap';
+        wrap.innerHTML = `
+          <div class="momentum-bar ${barClass}" style="height:${barH}%" title="${w.pct}%"></div>
+          <div class="momentum-label">${w.label}</div>
+        `;
+        chart.appendChild(wrap);
+      });
+
+      // Trend calculation
+      if (validWeeks.length >= 2) {
+        const recent = validWeeks[validWeeks.length - 1].pct;
+        const prev = validWeeks[validWeeks.length - 2].pct;
+        const diff = recent - prev;
+        if (diff > 0) {
+          trend.innerHTML = `<span class="trend-up">▲ +${diff}% from last week — improving</span>`;
+        } else if (diff < 0) {
+          trend.innerHTML = `<span class="trend-down">▼ ${diff}% from last week — declining</span>`;
+        } else {
+          trend.innerHTML = `<span class="trend-flat">◆ Holding steady</span>`;
+        }
+      } else {
+        trend.innerHTML = '<span class="trend-flat">Not enough data yet</span>';
       }
     }
 
-    function renderBestStreaks() {
-      const container = document.getElementById('bestStreaks');
-      container.innerHTML = '';
+    // ---- 4. HABIT INTEL ----
+    function renderHabitIntel() {
+      const el = document.getElementById('habitIntel');
+      el.innerHTML = '';
+      const todayStr = today();
+      const dates = getMonthDates().filter(d => d <= todayStr);
+      if (!dates.length || !data.habits.length) {
+        el.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">No data yet</div>';
+        return;
+      }
 
-      data.habits.forEach(habit => {
+      // Sort habits by completion pct (worst first for awareness)
+      const habitData = data.habits.map(habit => {
+        const done = dates.filter(d => isChecked(habit.id, d)).length;
+        const pct = Math.round((done / dates.length) * 100);
+        const cs = currentStreak(habit.id);
         const bs = bestStreak(habit.id);
-        const row = document.createElement('div');
-        row.className = 'streak-stat-row';
-        row.innerHTML = `<span class="sname">${escHtml(habit.name)}</span><span class="sval">${bs} day${bs !== 1 ? 's' : ''}</span>`;
-        container.appendChild(row);
+        return { habit, pct, done, cs, bs };
+      }).sort((a, b) => b.pct - a.pct);
+
+      habitData.forEach(hd => {
+        const rank = getHabitRank(hd.pct);
+        const card = document.createElement('div');
+        card.className = 'habit-intel-card';
+        card.innerHTML = `
+          <div class="hi-status-pip ${rank.pip}"></div>
+          <div class="hi-info">
+            <div class="hi-name">${escHtml(hd.habit.name)}</div>
+            <div class="hi-meta">🔥 ${hd.cs}d streak · Best: ${hd.bs}d · ${hd.done}/${dates.length} days</div>
+          </div>
+          <div class="hi-right">
+            <div class="hi-pct ${rank.pctCls}">${hd.pct}%</div>
+            <div class="hi-rank ${rank.rank}">${rank.label}</div>
+          </div>
+        `;
+        el.appendChild(card);
+      });
+    }
+
+    // ---- 5. WEAK POINTS ----
+    function renderWeakPoints() {
+      const el = document.getElementById('weakPoints');
+      el.innerHTML = '';
+      const todayStr = today();
+      const dates = getMonthDates().filter(d => d <= todayStr);
+      if (!dates.length || !data.habits.length) {
+        el.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">Not enough data</div>';
+        return;
+      }
+
+      // Worst habit
+      let worstHabit = null, worstPct = 101;
+      data.habits.forEach(h => {
+        const done = dates.filter(d => isChecked(h.id, d)).length;
+        const pct = Math.round((done / dates.length) * 100);
+        if (pct < worstPct) { worstPct = pct; worstHabit = h; }
       });
 
-      if (!data.habits.length) {
-        container.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">No habits yet</div>';
+      // Weakest day of the week
+      const dowCounts = [0,0,0,0,0,0,0];
+      const dowTotals = [0,0,0,0,0,0,0];
+      dates.forEach(ds => {
+        const d = new Date(ds + 'T12:00:00');
+        const dow = d.getDay();
+        data.habits.forEach(h => {
+          dowTotals[dow]++;
+          if (isChecked(h.id, ds)) dowCounts[dow]++;
+        });
+      });
+      let worstDow = 0, worstDowPct = 101;
+      for (let i = 0; i < 7; i++) {
+        if (dowTotals[i] === 0) continue;
+        const p = Math.round((dowCounts[i] / dowTotals[i]) * 100);
+        if (p < worstDowPct) { worstDowPct = p; worstDow = i; }
+      }
+
+      // Longest gap (consecutive days with 0 checks)
+      let longestGap = 0, currentGap = 0;
+      dates.forEach(ds => {
+        const anyDone = data.habits.some(h => isChecked(h.id, ds));
+        if (!anyDone) { currentGap++; longestGap = Math.max(longestGap, currentGap); }
+        else { currentGap = 0; }
+      });
+
+      // Build cards
+      if (worstHabit) {
+        el.innerHTML += `
+          <div class="weak-point-card">
+            <div class="wp-icon">📉</div>
+            <div class="wp-info">
+              <div class="wp-title">Weakest Habit: ${escHtml(worstHabit.name)}</div>
+              <div class="wp-detail">Only ${worstPct}% this month — this is holding you back</div>
+            </div>
+          </div>`;
+      }
+
+      el.innerHTML += `
+        <div class="weak-point-card wp-warn">
+          <div class="wp-icon">📅</div>
+          <div class="wp-info">
+            <div class="wp-title">Weakest Day: ${DAYS_SHORT[worstDow]}</div>
+            <div class="wp-detail">${worstDowPct}% completion — you consistently slip here</div>
+          </div>
+        </div>`;
+
+      if (longestGap > 0) {
+        el.innerHTML += `
+          <div class="weak-point-card">
+            <div class="wp-icon">⏸</div>
+            <div class="wp-info">
+              <div class="wp-title">Longest Blackout: ${longestGap} day${longestGap > 1 ? 's' : ''}</div>
+              <div class="wp-detail">${longestGap > 3 ? 'That\'s too long — momentum dies fast' : 'Keep gaps short to maintain momentum'}</div>
+            </div>
+          </div>`;
       }
     }
 
+    // ---- 6. DAY-OF-WEEK CHART ----
+    function renderDowChart() {
+      const el = document.getElementById('dowChart');
+      el.innerHTML = '';
+      const todayStr = today();
+      const dates = getMonthDates().filter(d => d <= todayStr);
+      if (!dates.length || !data.habits.length) return;
+
+      const dowCounts = [0,0,0,0,0,0,0];
+      const dowTotals = [0,0,0,0,0,0,0];
+      dates.forEach(ds => {
+        const d = new Date(ds + 'T12:00:00');
+        const dow = d.getDay();
+        data.habits.forEach(h => {
+          dowTotals[dow]++;
+          if (isChecked(h.id, ds)) dowCounts[dow]++;
+        });
+      });
+
+      const dowPcts = [];
+      for (let i = 0; i < 7; i++) {
+        dowPcts.push(dowTotals[i] ? Math.round((dowCounts[i] / dowTotals[i]) * 100) : 0);
+      }
+
+      const bestPct = Math.max(...dowPcts);
+      const worstPct = Math.min(...dowPcts.filter(p => p > 0), bestPct);
+
+      // Display Mon-Sun order
+      const order = [1, 2, 3, 4, 5, 6, 0];
+      const dayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+      order.forEach((dow, i) => {
+        const pct = dowPcts[dow];
+        let fillClass = '';
+        if (pct === bestPct && pct > 0) fillClass = 'dow-best';
+        else if (pct === worstPct && pct <= bestPct) fillClass = 'dow-worst';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'dow-bar-wrap';
+        wrap.innerHTML = `
+          <div class="dow-bar-track">
+            <div class="dow-bar-fill ${fillClass}" style="height:${pct}%"></div>
+          </div>
+          <div class="dow-label">${dayLabels[i]}</div>
+          <div class="dow-pct">${pct}%</div>
+        `;
+        el.appendChild(wrap);
+      });
+    }
+
+    // ---- 7. HEATMAP ----
     function renderHeatmap() {
       const container = document.getElementById('heatmapGrid');
       container.innerHTML = '';
@@ -1931,27 +2449,6 @@
         // Safety: break after 42 cells (6 weeks max)
         if (container.children.length >= 42) break;
       }
-    }
-
-    function renderOverallRate() {
-      const container = document.getElementById('overallRate');
-      const dates = getMonthDates();
-      const todayStr = today();
-      const validDates = dates.filter(d => d <= todayStr);
-      let total = 0, done = 0;
-
-      data.habits.forEach(habit => {
-        validDates.forEach(dateStr => {
-          total++;
-          if (isChecked(habit.id, dateStr)) done++;
-        });
-      });
-
-      const pct = total ? Math.round((done / total) * 100) : 0;
-      container.innerHTML = `
-    <div class="big-num">${pct}%</div>
-    <div class="big-label">${MONTHS[viewMonth]} ${viewYear}</div>
-  `;
     }
 
     // ========== YEARLY STATS ==========
@@ -2037,15 +2534,16 @@
 
       monthData.forEach(md => {
         if (md.pct === -1) return; // future month, skip
+        const g = getGrade(md.pct);
         const card = document.createElement('div');
         card.className = 'yearly-month-card';
         card.innerHTML = `
           <div class="yearly-month-header">
             <span class="yearly-month-name">${MONTHS[md.month]}</span>
-            <span class="yearly-month-pct">${md.pct}%</span>
+            <span class="yearly-month-pct" style="color:${md.pct >= 85 ? '#4ec463' : md.pct >= 70 ? '#3d9a50' : md.pct >= 50 ? '#c4a833' : '#c0392b'}">${md.pct}%</span>
           </div>
           <div class="yearly-mini-bar">
-            <div class="yearly-mini-bar-fill" style="width:${md.pct}%"></div>
+            <div class="yearly-mini-bar-fill" style="width:${md.pct}%;background:${md.pct >= 85 ? '#4ec463' : md.pct >= 70 ? '#3d9a50' : md.pct >= 50 ? '#c4a833' : '#c0392b'}"></div>
           </div>
         `;
         monthsContainer.appendChild(card);
@@ -2180,8 +2678,11 @@
       }
       needsScrollToToday = false;
       renderGrid();
-      // Scroll to start of month when going back
-      document.getElementById('gridWrapper').scrollLeft = 0;
+      // Scroll to end of month (most recent date) when viewing past months
+      requestAnimationFrame(() => {
+        const wrapper = document.getElementById('gridWrapper');
+        wrapper.scrollLeft = wrapper.scrollWidth;
+      });
     });
 
     document.getElementById('navNext').addEventListener('click', () => {
