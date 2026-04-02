@@ -481,6 +481,7 @@
 
     #addHabitBtn {
       width: 100%;
+      background: transparent;
       border: 1px dashed var(--border);
       color: var(--green);
       font-family: var(--font);
@@ -1256,63 +1257,72 @@
       </div>
 
 
-      <!-- STATS VIEW — REVAMPED -->
+      <!-- STATS VIEW — UNIFIED MASTER DASHBOARD -->
       <div class="view" id="statsView">
         <div class="stats-scroll">
-          <!-- Toggle: Monthly / Yearly -->
-          <div class="stats-toggle">
-            <button class="stats-toggle-btn active" id="statsMonthlyBtn" data-stats-view="monthly">Monthly</button>
-            <button class="stats-toggle-btn" id="statsYearlyBtn" data-stats-view="yearly">Yearly</button>
-          </div>
-
-          <!-- ===== MONTHLY PANEL ===== -->
-          <div id="statsMonthlyPanel">
+          <div id="unifiedStatsPanel">
+            
+            <!-- 1. DISCIPLINE SCORE (Top focus) -->
             <div class="stats-section stat-animate">
-              <h2><span class="section-icon">◆</span> Discipline Score</h2>
+              <h2><span class="section-icon">◆</span> Current Discipline Score</h2>
               <div class="disc-score-card" id="discScoreCard"></div>
             </div>
+
+            <!-- 2. YEARLY OVERVIEW HIGHLIGHTS -->
             <div class="stats-section stat-animate">
-              <h2><span class="section-icon">▪</span> Raw Numbers</h2>
+              <h2><span class="section-icon">◆</span> <span id="yearlyTitle">2026 Overview</span></h2>
+              <div class="yearly-summary" id="yearlySummary"></div>
+            </div>
+
+            <!-- 3. RAW NUMBERS -->
+            <div class="stats-section stat-animate">
+              <h2><span class="section-icon">▪</span> Monthly Raw Numbers</h2>
               <div class="stat-tiles" id="statTiles"></div>
             </div>
+
+            <!-- 4. WEEKLY MOMENTUM -->
             <div class="stats-section stat-animate">
-              <h2><span class="section-icon">▸</span> Weekly Momentum</h2>
+              <h2><span class="section-icon">▸</span> Weekly Momentum (Last 8 Weeks)</h2>
               <div class="momentum-chart" id="momentumChart"></div>
               <div class="momentum-trend" id="momentumTrend"></div>
             </div>
+            
+            <!-- 5. MONTH BY MONTH -->
             <div class="stats-section stat-animate">
-              <h2><span class="section-icon">◎</span> Habit Intel Report</h2>
+              <h2><span class="section-icon">▸</span> Year-to-Date Progress</h2>
+              <div id="yearlyMonths"></div>
+            </div>
+
+            <!-- 6. HABIT INTEL -->
+            <div class="stats-section stat-animate">
+              <h2><span class="section-icon">◎</span> Habit Intel Report (Current Month)</h2>
               <div id="habitIntel"></div>
             </div>
+
+            <!-- 7. WEAK POINTS -->
             <div class="stats-section stat-animate">
               <h2><span class="section-icon">⚠</span> Weak Points</h2>
               <div class="weak-points-grid" id="weakPoints"></div>
             </div>
+
+            <!-- 8. DAY-OF-WEEK -->
             <div class="stats-section stat-animate">
               <h2><span class="section-icon">▦</span> Day Breakdown</h2>
               <div class="dow-chart" id="dowChart"></div>
             </div>
+
+            <!-- 9. OPERATIONS HEATMAP (MONTHLY) -->
             <div class="stats-section stat-animate">
-              <h2><span class="section-icon">▥</span> Operations Heatmap</h2>
+              <h2><span class="section-icon">▥</span> Monthly Heatmap</h2>
               <div class="heatmap-label-row">
                 <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
               </div>
               <div class="heatmap-grid" id="heatmapGrid"></div>
             </div>
-          </div>
 
-          <!-- ===== YEARLY PANEL ===== -->
-          <div id="statsYearlyPanel" style="display:none;">
+            <!-- 10. YEAR HEATMAP -->
             <div class="stats-section stat-animate">
-              <h2><span class="section-icon">◆</span> <span id="yearlyTitle">2026 Overview</span></h2>
-              <div class="yearly-summary" id="yearlySummary"></div>
-            </div>
-            <div class="stats-section stat-animate">
-              <h2><span class="section-icon">▸</span> Month by Month</h2>
-              <div id="yearlyMonths"></div>
-            </div>
-            <div class="stats-section stat-animate">
-              <h2><span class="section-icon">▥</span> Year Heatmap</h2>
+              <h2><span class="section-icon">▥</span> Full Year Heatmap</h2>
               <div class="heatmap-label-row">
                 <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
               </div>
@@ -2066,24 +2076,17 @@
 
     // ========== STATS — REVAMPED ==========
 
-    let statsViewMode = 'monthly';
-
     function renderStats() {
-      if (statsViewMode === 'monthly') {
-        document.getElementById('statsMonthlyPanel').style.display = '';
-        document.getElementById('statsYearlyPanel').style.display = 'none';
-        renderDiscScore();
-        renderStatTiles();
-        renderMomentum();
-        renderHabitIntel();
-        renderWeakPoints();
-        renderDowChart();
-        renderHeatmap();
-      } else {
-        document.getElementById('statsMonthlyPanel').style.display = 'none';
-        document.getElementById('statsYearlyPanel').style.display = '';
-        renderYearlyStats();
-      }
+      // Month panels
+      renderDiscScore();
+      renderStatTiles();
+      renderMomentum();
+      renderHabitIntel();
+      renderWeakPoints();
+      renderDowChart();
+      renderHeatmap();
+      // Year panels
+      renderYearlyStats();
     }
 
     // ---- Helpers ----
@@ -2708,16 +2711,6 @@
     // Bottom nav
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', () => switchView(btn.dataset.view));
-    });
-
-    // Stats toggle (Monthly / Yearly)
-    document.querySelectorAll('.stats-toggle-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.stats-toggle-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        statsViewMode = btn.dataset.statsView;
-        renderStats();
-      });
     });
 
     // Add habit
