@@ -1755,7 +1755,9 @@
       for (let i = 0; i < 9999; i++) {
         const d = new Date(n);
         d.setDate(d.getDate() - i);
-        if (isChecked(habitId, fmtDate(d))) {
+        const ds = fmtDate(d);
+        if (ds < '2026-03-22') break;
+        if (isChecked(habitId, ds)) {
           streak++;
         } else {
           break;
@@ -1801,6 +1803,7 @@
       const dates = Object.keys(data.checks)
         .filter(k => k.startsWith(habitId + '_') && data.checks[k])
         .map(k => k.split('_').slice(1).join('_'))
+        .filter(d => d >= '2026-03-22')
         .sort();
       if (!dates.length) return 0;
       let best = 1, cur = 1;
@@ -2135,7 +2138,10 @@
       for(let i=0; i<30; i++) {
         const d = new Date(todayDate);
         d.setDate(d.getDate() - i);
-        dates.push(fmtDate(d));
+        const ds = fmtDate(d);
+        if (ds >= '2026-03-22') {
+          dates.push(ds);
+        }
       }
 
       if (!dates.length || !data.habits.length) {
@@ -2178,22 +2184,7 @@
         const d = new Date(startDate);
         d.setDate(d.getDate() + i);
         const ds = fmtDate(d);
-        if (ds <= todayStr) dates.push(ds);
-      }
-      if (!dates.length || !data.habits.length) return -1;
-      let done = 0, total = 0;
-      data.habits.forEach(h => { dates.forEach(ds => { total++; if (isChecked(h.id, ds)) done++; }); });
-      return total ? Math.round((done / total) * 100) : 0;
-    }
-
-    function getWeekPct(startDate) {
-      const todayStr = today();
-      const dates = [];
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(startDate);
-        d.setDate(d.getDate() + i);
-        const ds = fmtDate(d);
-        if (ds <= todayStr) dates.push(ds);
+        if (ds <= todayStr && ds >= '2026-03-22') dates.push(ds);
       }
       if (!dates.length || !data.habits.length) return -1;
       let done = 0, total = 0;
@@ -2270,7 +2261,7 @@
       const el = document.getElementById('habitIntel');
       el.innerHTML = '';
       const todayStr = today();
-      const dates = getMonthDates().filter(d => d <= todayStr);
+      const dates = getMonthDates().filter(d => d <= todayStr && d >= '2026-03-22');
       if (!dates.length || !data.habits.length) {
         el.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">No data yet</div>';
         return;
@@ -2307,7 +2298,7 @@
       const el = document.getElementById('weakPoints');
       el.innerHTML = '';
       const todayStr = today();
-      const dates = getMonthDates().filter(d => d < todayStr); // Excludes today
+      const dates = getMonthDates().filter(d => d < todayStr && d >= '2026-03-22'); // Excludes today
       if (!dates.length || !data.habits.length) {
         el.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">Not enough past data</div>';
         return;
