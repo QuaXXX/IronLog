@@ -1235,13 +1235,11 @@
     <div class="content">
       <!-- TODAY VIEW -->
       <div class="view active" id="todayView">
+        <!-- MONTH NAVIGATION -->
+        <div class="month-nav" id="monthNav" style="justify-content: center; width: 100%; position: static; background: var(--bg);">
+          <div class="month-label" id="monthLabel">Month Year</div>
+        </div>
         <div class="grid-wrapper" id="gridWrapper">
-          <!-- MONTH NAVIGATION -->
-          <div class="month-nav" id="monthNav">
-            <button class="month-nav-btn" id="navPrev" title="Previous month">◀</button>
-            <div class="month-label" id="monthLabel">March 2026</div>
-            <button class="month-nav-btn" id="navNext" title="Next month">▶</button>
-          </div>
           <table class="grid-table" id="habitGrid">
             <thead>
               <tr id="gridHeader"></tr>
@@ -1807,6 +1805,39 @@
       return streak;
     }
 
+    function getContinuousDates() {
+      const todayDate = new Date();
+      let earliest = new Date(todayDate);
+      earliest.setMonth(earliest.getMonth() - 2); // 2 months behind default
+      
+      data.habits.forEach(h => {
+        if (h.createdAt) {
+          const d = new Date(h.createdAt);
+          if (d < earliest && !isNaN(d)) earliest = d;
+        }
+      });
+      Object.keys(data.checks).forEach(k => {
+        const ds = k.split('_')[1];
+        if (ds) {
+          const d = new Date(ds + 'T12:00:00');
+          if (d < earliest && !isNaN(d)) earliest = d;
+        }
+      });
+
+      earliest.setDate(1);
+      let latest = new Date(todayDate);
+      latest.setMonth(latest.getMonth() + 2); // 2 months ahead
+      latest.setDate(daysInMonth(latest.getFullYear(), latest.getMonth()));
+
+      const dates = [];
+      let current = new Date(earliest);
+      while (current <= latest) {
+        dates.push(fmtDate(current));
+        current.setDate(current.getDate() + 1);
+      }
+      return dates;
+    }
+
     function bestStreak(habitId) {
       const dates = Object.keys(data.checks)
         .filter(k => k.startsWith(habitId + '_') && data.checks[k])
@@ -1898,31 +1929,17 @@
     let lastAddedHabitId = null;
 
     function renderGrid() {
-      const dates = getMonthDates();
+      const dates = getContinuousDates();
       const todayStr = today();
       const todayDate = new Date();
 
-      // Update month label
-      const isCurrentMonth = (viewYear === todayDate.getFullYear() && viewMonth === todayDate.getMonth());
+      // Ensure jump-to-today works if needed, although it's centered by default now
       const monthLabel = document.getElementById('monthLabel');
-      monthLabel.innerHTML = `${MONTHS[viewMonth]} ${viewYear}`;
-      if (!isCurrentMonth) {
-        monthLabel.innerHTML += `<span class="today-jump" id="todayJump" title="Jump to current month">⟳ Today</span>`;
-      }
-
-      // Disable forward nav if we're on the current month
-      document.getElementById('navNext').disabled = isCurrentMonth;
-
-      // Re-attach jump-to-today click
-      const jumpEl = document.getElementById('todayJump');
-      if (jumpEl) {
-        jumpEl.addEventListener('click', () => {
-          viewYear = todayDate.getFullYear();
-          viewMonth = todayDate.getMonth();
-          needsScrollToToday = true;
-          renderGrid();
-        });
-      }
+      
+      const jumpToToday = () => {
+        needsScrollToToday = true;
+        scrollToToday();
+      };
 
       // Header row
       const headerRow = document.getElementById('gridHeader');
@@ -2035,7 +2052,19 @@
               e.stopPropagation();
               toggleCheck(habit.id, dateStr);
               cell.classList.toggle('checked');
-              renderGrid();
+              
+              // Only update the streak display instead of doing a full re-render
+              const wrap = nameTd.querySelector('.habit-name-wrap');
+              const existingBadge = wrap.querySelector('.streak-badge');
+              if (existingBadge) existingBadge.remove();
+              const newStreak = currentStreak(habit.id);
+              if (newStreak >= 2) {
+                const badge = document.createElement('span');
+                badge.className = 'streak-badge';
+                badge.innerHTML = `<span class="fire">🔥</span>${newStreak}`;
+                wrap.appendChild(badge);
+              }
+
               if (isChecked(habit.id, dateStr)) {
                 checkMilestones(habit.id);
                 checkDayComplete();
@@ -2050,16 +2079,16 @@
         tbody.appendChild(tr);
       });
 
-      // Auto-scroll to today's column on initial load or when jumping to current month
-      if (needsScrollToToday && isCurrentMonth) {
+      // Auto-scroll to today's column on initial load
+      if (needsScrollToToday) {
         needsScrollToToday = false;
         requestAnimationFrame(() => {
           scrollToToday();
+          updateMonthLabelOnScroll();
         });
       }
     }
 
-    /** Scroll the grid so today's column is visible and roughly centered */
     function scrollToToday() {
       const wrapper = document.getElementById('gridWrapper');
       const todayTh = document.querySelector('.grid-table thead th.today-col');
@@ -2073,6 +2102,61 @@
 
       wrapper.scrollLeft = Math.max(0, scrollTarget);
     }
+
+    function updateMonthLabelOnScroll() {
+      const wrapper = document.getElementById('gridWrapper');
+      const headerRow = document.getElementById('gridHeader');
+      if (!headerRow || !wrapper) return;
+      
+      const visibleCenter = wrapper.scrollLeft + (wrapper.clientWidth / 2);
+      const ths = headerRow.querySelectorAll('th[data-date]');
+      
+      let closestTh = null;
+      let minDiff = Infinity;
+      
+      for (let i = 0; i < ths.length; i++) {
+        const th = ths[i];
+        const center = th.offsetLeft + (th.offsetWidth / 2);
+        const diff = Math.abs(center - visibleCenter);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestTh = th;
+        } else if (diff > minDiff) {
+          // Since columns are ordered, diffs go down then up
+          break;
+        }
+      }
+      
+      if (closestTh) {
+        const dateStr = closestTh.getAttribute('data-date');
+        const d = new Date(dateStr + 'T12:00:00');
+        const monthLabel = document.getElementById('monthLabel');
+        const newLabelText = `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+        
+        let htmlStr = newLabelText;
+        // Optionally add 'Jump to Today' if not focused on current month
+        const todayDate = new Date();
+        if (d.getMonth() !== todayDate.getMonth() || d.getFullYear() !== todayDate.getFullYear()) {
+          htmlStr += `<span class="today-jump" id="todayJumpMonth" title="Jump to today">⟳ Today</span>`;
+        }
+        
+        if (monthLabel.innerHTML !== htmlStr) {
+          monthLabel.innerHTML = htmlStr;
+          const jumpBtn = document.getElementById('todayJumpMonth');
+          if (jumpBtn) {
+            jumpBtn.addEventListener('click', () => {
+              scrollToToday();
+            });
+          }
+        }
+      }
+    }
+
+    // Attach scroll listener to wrapper
+    document.getElementById('gridWrapper').addEventListener('scroll', () => {
+      // Throttle slightly or just use rAF
+      requestAnimationFrame(updateMonthLabelOnScroll);
+    });
 
     // ========== STATS — REVAMPED ==========
 
@@ -2672,41 +2756,9 @@
 
     // ========== EVENT LISTENERS ==========
 
-    // Month nav
-    document.getElementById('navPrev').addEventListener('click', () => {
-      viewMonth--;
-      if (viewMonth < 0) {
-        viewMonth = 11;
-        viewYear--;
-      }
-      needsScrollToToday = false;
-      renderGrid();
-      // Scroll to end of month (most recent date) when viewing past months
-      requestAnimationFrame(() => {
-        const wrapper = document.getElementById('gridWrapper');
-        wrapper.scrollLeft = wrapper.scrollWidth;
-      });
-    });
+    // Nav buttons removed, relying on continuous scroll
 
-    document.getElementById('navNext').addEventListener('click', () => {
-      const todayDate = new Date();
-      const isCurrentMonth = (viewYear === todayDate.getFullYear() && viewMonth === todayDate.getMonth());
-      if (isCurrentMonth) return; // can't go forward past current month
-
-      viewMonth++;
-      if (viewMonth > 11) {
-        viewMonth = 0;
-        viewYear++;
-      }
-
-      // If returning to current month, scroll to today
-      const nowCurrentMonth = (viewYear === todayDate.getFullYear() && viewMonth === todayDate.getMonth());
-      needsScrollToToday = nowCurrentMonth;
-      renderGrid();
-      if (!nowCurrentMonth) {
-        document.getElementById('gridWrapper').scrollLeft = 0;
-      }
-    });
+    // Forward nav also removed
 
     // Bottom nav
     document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -2811,45 +2863,9 @@
       new ElasticScroll(document.querySelector('.content'));
     });
 
-    // ========== SWIPE NAVIGATION ==========
-    (function initSwipeNav() {
-      const appEl = document.getElementById('app');
-      let touchStartX = 0;
-      let touchStartY = 0;
-      let touchEndX = 0;
-      let touchEndY = 0;
-      let swiping = false;
-
-      const views = ['todayView', 'statsView'];
-
-      appEl.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
-        swiping = true;
-      }, { passive: true });
-
-      appEl.addEventListener('touchend', (e) => {
-        if (!swiping) return;
-        swiping = false;
-        touchEndX = e.changedTouches[0].screenX;
-        touchEndY = e.changedTouches[0].screenY;
-
-        const deltaX = touchEndX - touchStartX;
-        const deltaY = touchEndY - touchStartY;
-
-        // Only handle horizontal swipes where horizontal movement dominates
-        if (Math.abs(deltaX) < 60 || Math.abs(deltaY) > Math.abs(deltaX) * 0.7) return;
-
-        const currentIdx = views.indexOf(currentView);
-        if (deltaX < 0 && currentIdx < views.length - 1) {
-          // Swipe left → go to next view
-          switchView(views[currentIdx + 1]);
-        } else if (deltaX > 0 && currentIdx > 0) {
-          // Swipe right → go to previous view
-          switchView(views[currentIdx - 1]);
-        }
-      }, { passive: true });
-    })();
+    // ========== SWIPE NAVIGATION (REMOVED) ==========
+    // Swipe nav to stats view was removed because it conflicted with horizontal scrolling
+    // of the continuous grid.
 
     // ========== INIT ==========
     needsScrollToToday = true;
