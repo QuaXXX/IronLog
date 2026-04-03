@@ -1260,32 +1260,25 @@
         <div class="stats-scroll">
           <div id="unifiedStatsPanel">
             
-            <!-- 2. YEARLY OVERVIEW HIGHLIGHTS -->
+            <!-- 1. WEEKLY MOMENTUM -->
             <div class="stats-section stat-animate">
-              <h2><span class="section-icon">◆</span> <span id="yearlyTitle">2026 Overview</span></h2>
-              <div class="yearly-summary" id="yearlySummary"></div>
-            </div>
-            
-            <!-- 5. MONTH BY MONTH -->
-            <div class="stats-section stat-animate">
-              <h2><span class="section-icon">▸</span> Year-to-Date Progress</h2>
-              <div id="yearlyMonths"></div>
+              <h2><span class="section-icon">▸</span> Weekly Momentum (Last 8 Weeks)</h2>
+              <div class="momentum-chart" id="momentumChart"></div>
+              <div class="momentum-trend" id="momentumTrend"></div>
             </div>
 
-            <!-- 6. HABIT INTEL -->
+            <!-- 2. HABIT INTEL -->
             <div class="stats-section stat-animate">
               <h2><span class="section-icon">◎</span> Habit Intel Report (Current Month)</h2>
               <div id="habitIntel"></div>
             </div>
 
-            <!-- 10. YEAR HEATMAP -->
+            <!-- 3. WEAK POINTS -->
             <div class="stats-section stat-animate">
-              <h2><span class="section-icon">▥</span> Full Year Heatmap</h2>
-              <div class="heatmap-label-row">
-                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-              </div>
-              <div class="heatmap-grid" id="yearlyHeatmapGrid"></div>
+              <h2><span class="section-icon">⚠</span> Weak Points</h2>
+              <div class="weak-points-grid" id="weakPoints"></div>
             </div>
+            
           </div>
 
           <div style="margin-top:16px;">
@@ -2121,22 +2114,23 @@
     // ========== STATS — REVAMPED ==========
 
     function renderStats() {
-      // Month panels
+      renderMomentum();
       renderHabitIntel();
-      // Year panels
-      renderYearlyStats();
+      renderWeakPoints();
     }
 
     // ---- Helpers ----
-    function getMonthPct(year, month) {
+
+    function getWeekPct(startDate) {
       const todayStr = today();
-      const dim = daysInMonth(year, month);
       const dates = [];
-      for (let d = 1; d <= dim; d++) {
-        const ds = fmtDate(new Date(year, month, d));
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + i);
+        const ds = fmtDate(d);
         if (ds <= todayStr) dates.push(ds);
       }
-      if (!dates.length || !data.habits.length) return 0;
+      if (!dates.length || !data.habits.length) return -1;
       let done = 0, total = 0;
       data.habits.forEach(h => { dates.forEach(ds => { total++; if (isChecked(h.id, ds)) done++; }); });
       return total ? Math.round((done / total) * 100) : 0;
@@ -2157,25 +2151,71 @@
       return total ? Math.round((done / total) * 100) : 0;
     }
 
-    function getGrade(pct) {
-      if (pct >= 95) return { grade: 'S', cls: 'grade-s', verdict: 'MACHINE MODE', vcls: 'v-elite' };
-      if (pct >= 85) return { grade: 'A', cls: 'grade-a', verdict: 'LOCKED IN', vcls: 'v-solid' };
-      if (pct >= 70) return { grade: 'B', cls: 'grade-b', verdict: 'SOLID EFFORT', vcls: 'v-decent' };
-      if (pct >= 50) return { grade: 'C', cls: 'grade-c', verdict: 'ROOM TO GROW', vcls: 'v-mid' };
-      if (pct >= 30) return { grade: 'D', cls: 'grade-d', verdict: 'FALLING BEHIND', vcls: 'v-weak' };
-      return { grade: 'F', cls: 'grade-f', verdict: 'WAKE UP', vcls: 'v-failing' };
+    // ---- 1. WEEKLY MOMENTUM ----
+    function renderMomentum() {
+      const chart = document.getElementById('momentumChart');
+      const trend = document.getElementById('momentumTrend');
+      chart.innerHTML = '';
+
+      // Get last 8 weeks ending with current week
+      const todayDate = new Date();
+      const todayDay = todayDate.getDay();
+      // Find Monday of current week
+      const monday = new Date(todayDate);
+      monday.setDate(monday.getDate() - (todayDay === 0 ? 6 : todayDay - 1));
+      monday.setHours(0,0,0,0);
+
+      const weeks = [];
+      for (let w = 7; w >= 0; w--) {
+        const weekStart = new Date(monday);
+        weekStart.setDate(weekStart.getDate() - (w * 7));
+        const pct = getWeekPct(weekStart);
+        const mLabel = MONTHS[weekStart.getMonth()].substring(0, 3);
+        const dLabel = weekStart.getDate();
+        weeks.push({ pct, label: `${mLabel} ${dLabel}`, isCurrent: w === 0 });
+      }
+
+      const validWeeks = weeks.filter(w => w.pct >= 0);
+      
+      weeks.forEach(w => {
+        if (w.pct < 0) return; // skip fully future weeks
+        const barH = Math.max(2, (w.pct / 100) * 100);
+        
+        // Military tactical theme colors
+        let barColor = '';
+        if (w.pct >= 85) barColor = 'var(--green)';
+        else if (w.pct >= 70) barColor = 'var(--green-dim)';
+        else if (w.pct >= 50) barColor = '#666';
+        else if (w.pct >= 30) barColor = '#444';
+        else barColor = '#333';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'momentum-bar-wrap';
+        wrap.innerHTML = `
+          <div class="momentum-bar" style="height:${barH}%; background:${barColor}; ${w.isCurrent ? 'border: 1px solid var(--text);' : ''}" title="${w.pct}%"></div>
+          <div class="momentum-label">${w.label}</div>
+        `;
+        chart.appendChild(wrap);
+      });
+
+      // Trend calculation
+      if (validWeeks.length >= 2) {
+        const recent = validWeeks[validWeeks.length - 1].pct;
+        const prev = validWeeks[validWeeks.length - 2].pct;
+        const diff = recent - prev;
+        if (diff > 0) {
+          trend.innerHTML = `<span class="trend-up">▲ +${diff}% from last week</span>`;
+        } else if (diff < 0) {
+          trend.innerHTML = `<span class="trend-down" style="color:#c0392b;">▼ ${diff}% from last week</span>`;
+        } else {
+          trend.innerHTML = `<span class="trend-flat">◆ Holding steady</span>`;
+        }
+      } else {
+        trend.innerHTML = '<span class="trend-flat">Not enough data yet</span>';
+      }
     }
 
-    function getHabitRank(pct) {
-      if (pct >= 85) return { label: 'DOMINANT', pip: 'pip-dominant', rank: 'rank-dominant', pctCls: 'pct-high' };
-      if (pct >= 60) return { label: 'SOLID', pip: 'pip-solid', rank: 'rank-solid', pctCls: 'pct-high' };
-      if (pct >= 30) return { label: 'SLACKING', pip: 'pip-slacking', rank: 'rank-slacking', pctCls: 'pct-mid' };
-      return { label: 'AWOL', pip: 'pip-awol', rank: 'rank-awol', pctCls: 'pct-low' };
-    }
-
-
-
-    // ---- 4. HABIT INTEL ----
+    // ---- 2. HABIT INTEL ----
     function renderHabitIntel() {
       const el = document.getElementById('habitIntel');
       el.innerHTML = '';
@@ -2196,178 +2236,88 @@
       }).sort((a, b) => b.pct - a.pct);
 
       habitData.forEach(hd => {
-        const rank = getHabitRank(hd.pct);
         const card = document.createElement('div');
         card.className = 'habit-intel-card';
         card.innerHTML = `
-          <div class="hi-status-pip ${rank.pip}"></div>
+          <div class="hi-status-pip" style="background: ${hd.pct >= 85 ? 'var(--green)' : hd.pct >= 60 ? 'var(--green-dim)' : hd.pct >= 30 ? '#666' : '#c0392b'};"></div>
           <div class="hi-info">
             <div class="hi-name">${escHtml(hd.habit.name)}</div>
             <div class="hi-meta">🔥 ${hd.cs}d streak · Best: ${hd.bs}d · ${hd.done}/${dates.length} days</div>
           </div>
           <div class="hi-right">
-            <div class="hi-pct ${rank.pctCls}">${hd.pct}%</div>
-            <div class="hi-rank ${rank.rank}">${rank.label}</div>
+            <div class="hi-pct" style="color: ${hd.pct >= 85 ? 'var(--green)' : hd.pct >= 60 ? 'var(--text)' : hd.pct >= 30 ? 'var(--text-dim)' : '#c0392b'}; margin-right: 0px !important;">${hd.pct}%</div>
           </div>
         `;
         el.appendChild(card);
       });
     }
 
-
-
-    // ========== YEARLY STATS ==========
-
-    function renderYearlyStats() {
-      const todayDate = new Date();
-      const year = todayDate.getFullYear();
+    // ---- 3. WEAK POINTS ----
+    function renderWeakPoints() {
+      const el = document.getElementById('weakPoints');
+      el.innerHTML = '';
       const todayStr = today();
-
-      document.getElementById('yearlyTitle').textContent = `${year} Overview`;
-
-      // Calculate summary stats
-      let totalChecks = 0;
-      let totalPossible = 0;
-      let bestMonthPct = 0;
-      let bestMonthName = '';
-      let totalDaysActive = 0;
-
-      const monthData = [];
-
-      for (let m = 0; m < 12; m++) {
-        const dim = daysInMonth(year, m);
-        const dates = [];
-        for (let d = 1; d <= dim; d++) {
-          const dt = new Date(year, m, d);
-          const ds = fmtDate(dt);
-          if (ds <= todayStr) dates.push(ds);
-        }
-
-        if (dates.length === 0) {
-          monthData.push({ month: m, pct: -1, done: 0, total: 0 });
-          continue;
-        }
-
-        let done = 0, total = 0;
-        data.habits.forEach(habit => {
-          dates.forEach(ds => {
-            total++;
-            if (isChecked(habit.id, ds)) done++;
-          });
-        });
-
-        totalChecks += done;
-        totalPossible += total;
-
-        // Count active days (at least 1 check)
-        dates.forEach(ds => {
-          const anyDone = data.habits.some(h => isChecked(h.id, ds));
-          if (anyDone) totalDaysActive++;
-        });
-
-        const pct = total ? Math.round((done / total) * 100) : 0;
-        if (pct > bestMonthPct) {
-          bestMonthPct = pct;
-          bestMonthName = MONTHS[m].substring(0, 3);
-        }
-
-        monthData.push({ month: m, pct, done, total });
+      const dates = getMonthDates().filter(d => d <= todayStr);
+      if (!dates.length || !data.habits.length) {
+        el.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">Not enough data</div>';
+        return;
       }
 
-      const overallPct = totalPossible ? Math.round((totalChecks / totalPossible) * 100) : 0;
-
-      // Summary cards
-      const summaryContainer = document.getElementById('yearlySummary');
-      summaryContainer.innerHTML = `
-        <div class="yearly-summary-card">
-          <div class="ysc-num">${overallPct}%</div>
-          <div class="ysc-label">Year Rate</div>
-        </div>
-        <div class="yearly-summary-card">
-          <div class="ysc-num">${totalDaysActive}</div>
-          <div class="ysc-label">Active Days</div>
-        </div>
-        <div class="yearly-summary-card">
-          <div class="ysc-num">${bestMonthName || '—'}</div>
-          <div class="ysc-label">Best Month</div>
-        </div>
-      `;
-
-      // Month-by-month cards
-      const monthsContainer = document.getElementById('yearlyMonths');
-      monthsContainer.innerHTML = '';
-
-      monthData.forEach(md => {
-        if (md.pct === -1) return; // future month, skip
-        const g = getGrade(md.pct);
-        const card = document.createElement('div');
-        card.className = 'yearly-month-card';
-        card.innerHTML = `
-          <div class="yearly-month-header">
-            <span class="yearly-month-name">${MONTHS[md.month]}</span>
-            <span class="yearly-month-pct" style="color:${md.pct >= 85 ? '#4ec463' : md.pct >= 70 ? '#3d9a50' : md.pct >= 50 ? '#c4a833' : '#c0392b'}">${md.pct}%</span>
-          </div>
-          <div class="yearly-mini-bar">
-            <div class="yearly-mini-bar-fill" style="width:${md.pct}%;background:${md.pct >= 85 ? '#4ec463' : md.pct >= 70 ? '#3d9a50' : md.pct >= 50 ? '#c4a833' : '#c0392b'}"></div>
-          </div>
-        `;
-        monthsContainer.appendChild(card);
+      // Worst habit
+      let worstHabit = null, worstPct = 101;
+      data.habits.forEach(h => {
+        const done = dates.filter(d => isChecked(h.id, d)).length;
+        const pct = Math.round((done / dates.length) * 100);
+        if (pct < worstPct) { worstPct = pct; worstHabit = h; }
       });
 
-      if (monthsContainer.children.length === 0) {
-        monthsContainer.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">No data yet</div>';
+      // Weakest day of the week
+      const dowCounts = [0,0,0,0,0,0,0];
+      const dowTotals = [0,0,0,0,0,0,0];
+      dates.forEach(ds => {
+        const d = new Date(ds + 'T12:00:00');
+        const dow = d.getDay();
+        data.habits.forEach(h => {
+          dowTotals[dow]++;
+          if (isChecked(h.id, ds)) dowCounts[dow]++;
+        });
+      });
+      let worstDow = 0, worstDowPct = 101;
+      for (let i = 0; i < 7; i++) {
+        if (dowTotals[i] === 0) continue;
+        const p = Math.round((dowCounts[i] / dowTotals[i]) * 100);
+        if (p < worstDowPct) { worstDowPct = p; worstDow = i; }
       }
 
-      // Yearly heatmap
-      renderYearlyHeatmap(year);
-    }
+      // Longest gap (consecutive days with 0 checks)
+      let longestGap = 0, currentGap = 0;
+      dates.forEach(ds => {
+        const anyDone = data.habits.some(h => isChecked(h.id, ds));
+        if (!anyDone) { currentGap++; longestGap = Math.max(longestGap, currentGap); }
+        else { currentGap = 0; }
+      });
 
-    function renderYearlyHeatmap(year) {
-      const container = document.getElementById('yearlyHeatmapGrid');
-      container.innerHTML = '';
-      const todayDate = new Date();
+      // Build cards
+      if (worstHabit && worstPct < 100) {
+        el.innerHTML += `
+          <div class="weak-point-card" style="border: 1px solid var(--border); padding: 12px; background: var(--surface2); border-radius: 4px; margin-bottom: 8px;">
+            <div style="font-weight: bold; color: #c0392b; margin-bottom: 4px;">Weakest Habit: ${escHtml(worstHabit.name)}</div>
+            <div style="font-size: 11px; color: var(--text-dim);">Only ${worstPct}% this month — pay attention.</div>
+          </div>`;
+      }
 
-      // Start from Jan 1, find the Monday before or on Jan 1
-      const jan1 = new Date(year, 0, 1);
-      const startDay = new Date(jan1);
-      const dow = startDay.getDay();
-      const mondayOffset = dow === 0 ? 6 : dow - 1;
-      startDay.setDate(startDay.getDate() - mondayOffset);
+      el.innerHTML += `
+        <div class="weak-point-card" style="border: 1px solid var(--border); padding: 12px; background: var(--surface2); border-radius: 4px; margin-bottom: 8px;">
+          <div style="font-weight: bold; color: var(--text); margin-bottom: 4px;">Weakest Day: ${DAYS_SHORT[worstDow]}</div>
+          <div style="font-size: 11px; color: var(--text-dim);">${worstDowPct}% completion — history shows you slip here.</div>
+        </div>`;
 
-      // Go to Dec 31 then fill to end of that week
-      const dec31 = new Date(year, 11, 31);
-
-      let current = new Date(startDay);
-      let cellCount = 0;
-
-      while (current <= dec31 || current.getDay() !== 1) {
-        const dateStr = fmtDate(current);
-        const isInYear = current.getFullYear() === year;
-        const doneH = data.habits.filter(h => isChecked(h.id, dateStr)).length;
-        const totalH = data.habits.length || 1;
-        const ratio = doneH / totalH;
-
-        const cell = document.createElement('div');
-        cell.className = 'heatmap-cell';
-        cell.style.aspectRatio = '1';
-        if (ratio > 0 && ratio <= 0.25) cell.classList.add('lvl-1');
-        else if (ratio > 0.25 && ratio <= 0.5) cell.classList.add('lvl-2');
-        else if (ratio > 0.5 && ratio <= 0.75) cell.classList.add('lvl-3');
-        else if (ratio > 0.75) cell.classList.add('lvl-4');
-
-        if (!isInYear) cell.style.opacity = '0.1';
-        else if (current > todayDate) cell.style.opacity = '0.15';
-
-        const tip = document.createElement('span');
-        tip.className = 'tooltip';
-        tip.textContent = `${MONTHS[current.getMonth()].substring(0, 3)} ${current.getDate()}: ${doneH}/${data.habits.length}`;
-        cell.appendChild(tip);
-
-        container.appendChild(cell);
-        current.setDate(current.getDate() + 1);
-        cellCount++;
-
-        if (cellCount >= 371) break; // 53 weeks max
+      if (longestGap > 0) {
+        el.innerHTML += `
+          <div class="weak-point-card" style="border: 1px solid var(--border); padding: 12px; background: var(--surface2); border-radius: 4px;">
+            <div style="font-weight: bold; color: var(--text); margin-bottom: 4px;">Longest Blackout: ${longestGap} day${longestGap > 1 ? 's' : ''}</div>
+            <div style="font-size: 11px; color: var(--text-dim);">${longestGap > 3 ? 'That\'s too long — momentum dies fast' : 'Keep gaps short.'}</div>
+          </div>`;
       }
     }
 
