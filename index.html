@@ -1260,11 +1260,10 @@
         <div class="stats-scroll">
           <div id="unifiedStatsPanel">
             
-            <!-- 1. WEEKLY MOMENTUM -->
+            <!-- 1. MAIN STAT -->
             <div class="stats-section stat-animate">
-              <h2><span class="section-icon">▸</span> Weekly Momentum (Last 8 Weeks)</h2>
-              <div class="momentum-chart" id="momentumChart"></div>
-              <div class="momentum-trend" id="momentumTrend"></div>
+              <h2><span class="section-icon">◆</span> 30-Day Completion Rate</h2>
+              <div id="mainStatScore"></div>
             </div>
 
             <!-- 2. HABIT INTEL -->
@@ -1277,6 +1276,13 @@
             <div class="stats-section stat-animate">
               <h2><span class="section-icon">⚠</span> Weak Points</h2>
               <div class="weak-points-grid" id="weakPoints"></div>
+            </div>
+
+            <!-- 4. WEEKLY MOMENTUM -->
+            <div class="stats-section stat-animate">
+              <h2><span class="section-icon">▸</span> Weekly Momentum (Last 8 Weeks)</h2>
+              <div class="momentum-chart" id="momentumChart"></div>
+              <div class="momentum-trend" id="momentumTrend"></div>
             </div>
             
           </div>
@@ -2114,9 +2120,53 @@
     // ========== STATS — REVAMPED ==========
 
     function renderStats() {
-      renderMomentum();
+      renderMainStat();
       renderHabitIntel();
       renderWeakPoints();
+      renderMomentum();
+    }
+
+    // ---- MAIN STAT ----
+    function renderMainStat() {
+      const el = document.getElementById('mainStatScore');
+      const todayDate = new Date();
+      
+      const dates = [];
+      for(let i=0; i<30; i++) {
+        const d = new Date(todayDate);
+        d.setDate(d.getDate() - i);
+        dates.push(fmtDate(d));
+      }
+
+      if (!dates.length || !data.habits.length) {
+        el.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">No data yet</div>';
+        return;
+      }
+
+      let total = 0, done = 0;
+      data.habits.forEach(h => {
+        dates.forEach(ds => {
+          total++;
+          if (isChecked(h.id, ds)) done++;
+        });
+      });
+
+      const pct = total ? Math.round((done / total) * 100) : 0;
+      
+      let color = '';
+      if (pct >= 85) color = 'var(--green)';
+      else if (pct >= 60) color = 'var(--text)';
+      else if (pct >= 30) color = '#c4a833';
+      else color = '#c0392b';
+
+      el.innerHTML = `
+        <div style="font-size: 56px; font-weight: 800; text-align: center; color: ${color}; letter-spacing: -2px; margin: 10px 0;">
+          ${pct}%
+        </div>
+        <div style="text-align: center; color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">
+          ${done} out of ${total} actions completed in last 30 days
+        </div>
+      `;
     }
 
     // ---- Helpers ----
@@ -2257,9 +2307,9 @@
       const el = document.getElementById('weakPoints');
       el.innerHTML = '';
       const todayStr = today();
-      const dates = getMonthDates().filter(d => d <= todayStr);
+      const dates = getMonthDates().filter(d => d < todayStr); // Excludes today
       if (!dates.length || !data.habits.length) {
-        el.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">Not enough data</div>';
+        el.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">Not enough past data</div>';
         return;
       }
 
