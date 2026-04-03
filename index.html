@@ -112,7 +112,7 @@
       display: flex;
       align-items: center;
       gap: 4px;
-      padding: 12px 16px 8px;
+      padding: 32px 16px 16px;
       flex-shrink: 0;
       position: sticky;
       left: 0;
@@ -1260,29 +1260,10 @@
         <div class="stats-scroll">
           <div id="unifiedStatsPanel">
             
-            <!-- 1. DISCIPLINE SCORE (Top focus) -->
-            <div class="stats-section stat-animate">
-              <h2><span class="section-icon">◆</span> Current Discipline Score</h2>
-              <div class="disc-score-card" id="discScoreCard"></div>
-            </div>
-
             <!-- 2. YEARLY OVERVIEW HIGHLIGHTS -->
             <div class="stats-section stat-animate">
               <h2><span class="section-icon">◆</span> <span id="yearlyTitle">2026 Overview</span></h2>
               <div class="yearly-summary" id="yearlySummary"></div>
-            </div>
-
-            <!-- 3. RAW NUMBERS -->
-            <div class="stats-section stat-animate">
-              <h2><span class="section-icon">▪</span> Monthly Raw Numbers</h2>
-              <div class="stat-tiles" id="statTiles"></div>
-            </div>
-
-            <!-- 4. WEEKLY MOMENTUM -->
-            <div class="stats-section stat-animate">
-              <h2><span class="section-icon">▸</span> Weekly Momentum (Last 8 Weeks)</h2>
-              <div class="momentum-chart" id="momentumChart"></div>
-              <div class="momentum-trend" id="momentumTrend"></div>
             </div>
             
             <!-- 5. MONTH BY MONTH -->
@@ -1295,27 +1276,6 @@
             <div class="stats-section stat-animate">
               <h2><span class="section-icon">◎</span> Habit Intel Report (Current Month)</h2>
               <div id="habitIntel"></div>
-            </div>
-
-            <!-- 7. WEAK POINTS -->
-            <div class="stats-section stat-animate">
-              <h2><span class="section-icon">⚠</span> Weak Points</h2>
-              <div class="weak-points-grid" id="weakPoints"></div>
-            </div>
-
-            <!-- 8. DAY-OF-WEEK -->
-            <div class="stats-section stat-animate">
-              <h2><span class="section-icon">▦</span> Day Breakdown</h2>
-              <div class="dow-chart" id="dowChart"></div>
-            </div>
-
-            <!-- 9. OPERATIONS HEATMAP (MONTHLY) -->
-            <div class="stats-section stat-animate">
-              <h2><span class="section-icon">▥</span> Monthly Heatmap</h2>
-              <div class="heatmap-label-row">
-                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-              </div>
-              <div class="heatmap-grid" id="heatmapGrid"></div>
             </div>
 
             <!-- 10. YEAR HEATMAP -->
@@ -2162,13 +2122,7 @@
 
     function renderStats() {
       // Month panels
-      renderDiscScore();
-      renderStatTiles();
-      renderMomentum();
       renderHabitIntel();
-      renderWeakPoints();
-      renderDowChart();
-      renderHeatmap();
       // Year panels
       renderYearlyStats();
     }
@@ -2219,108 +2173,7 @@
       return { label: 'AWOL', pip: 'pip-awol', rank: 'rank-awol', pctCls: 'pct-low' };
     }
 
-    // ---- 1. DISCIPLINE SCORE ----
-    function renderDiscScore() {
-      const el = document.getElementById('discScoreCard');
-      const todayStr = today();
-      const dates = getMonthDates().filter(d => d <= todayStr);
-      let total = 0, done = 0;
-      data.habits.forEach(h => { dates.forEach(ds => { total++; if (isChecked(h.id, ds)) done++; }); });
-      const pct = total ? Math.round((done / total) * 100) : 0;
-      const g = getGrade(pct);
-      el.innerHTML = `
-        <div class="disc-grade ${g.cls}">${g.grade}</div>
-        <div class="disc-pct">${pct}% completion — ${MONTHS[viewMonth]} ${viewYear}</div>
-        <div class="disc-verdict ${g.vcls}">${g.verdict}</div>
-      `;
-    }
 
-    // ---- 2. RAW NUMBERS ----
-    function renderStatTiles() {
-      const el = document.getElementById('statTiles');
-      const todayStr = today();
-      const dates = getMonthDates().filter(d => d <= todayStr);
-      let totalChecks = 0, totalMisses = 0, perfectDays = 0, zeroDays = 0;
-
-      dates.forEach(ds => {
-        const doneCount = data.habits.filter(h => isChecked(h.id, ds)).length;
-        totalChecks += doneCount;
-        totalMisses += data.habits.length - doneCount;
-        if (doneCount === data.habits.length && data.habits.length > 0) perfectDays++;
-        if (doneCount === 0 && data.habits.length > 0) zeroDays++;
-      });
-
-      el.innerHTML = `
-        <div class="stat-tile"><div class="st-num st-bright">${totalChecks}</div><div class="st-label">Checks Done</div></div>
-        <div class="stat-tile"><div class="st-num st-red">${totalMisses}</div><div class="st-label">Missed</div></div>
-        <div class="stat-tile"><div class="st-num st-bright">${perfectDays}</div><div class="st-label">Perfect Days</div></div>
-        <div class="stat-tile"><div class="st-num ${zeroDays > 0 ? 'st-red' : ''} ">${zeroDays}</div><div class="st-label">Zero Days</div></div>
-      `;
-    }
-
-    // ---- 3. MOMENTUM ----
-    function renderMomentum() {
-      const chart = document.getElementById('momentumChart');
-      const trend = document.getElementById('momentumTrend');
-      chart.innerHTML = '';
-
-      // Get last 8 weeks ending with current week
-      const todayDate = new Date();
-      const todayDay = todayDate.getDay();
-      // Find Monday of current week
-      const monday = new Date(todayDate);
-      monday.setDate(monday.getDate() - (todayDay === 0 ? 6 : todayDay - 1));
-      monday.setHours(0,0,0,0);
-
-      const weeks = [];
-      for (let w = 7; w >= 0; w--) {
-        const weekStart = new Date(monday);
-        weekStart.setDate(weekStart.getDate() - (w * 7));
-        const pct = getWeekPct(weekStart);
-        const mLabel = MONTHS[weekStart.getMonth()].substring(0, 3);
-        const dLabel = weekStart.getDate();
-        weeks.push({ pct, label: `${mLabel} ${dLabel}`, isCurrent: w === 0 });
-      }
-
-      const validWeeks = weeks.filter(w => w.pct >= 0);
-      const maxPct = Math.max(...validWeeks.map(w => w.pct), 1);
-
-      weeks.forEach(w => {
-        if (w.pct < 0) return; // skip fully future weeks
-        const barH = Math.max(2, (w.pct / 100) * 100);
-        let barClass = '';
-        if (w.pct >= 85) barClass = 'bar-hot';
-        else if (w.pct >= 70) barClass = 'bar-warm';
-        else if (w.pct >= 50) barClass = 'bar-cool';
-        else if (w.pct >= 30) barClass = 'bar-cold';
-        else barClass = 'bar-ice';
-        if (w.isCurrent) barClass += ' bar-current';
-
-        const wrap = document.createElement('div');
-        wrap.className = 'momentum-bar-wrap';
-        wrap.innerHTML = `
-          <div class="momentum-bar ${barClass}" style="height:${barH}%" title="${w.pct}%"></div>
-          <div class="momentum-label">${w.label}</div>
-        `;
-        chart.appendChild(wrap);
-      });
-
-      // Trend calculation
-      if (validWeeks.length >= 2) {
-        const recent = validWeeks[validWeeks.length - 1].pct;
-        const prev = validWeeks[validWeeks.length - 2].pct;
-        const diff = recent - prev;
-        if (diff > 0) {
-          trend.innerHTML = `<span class="trend-up">▲ +${diff}% from last week — improving</span>`;
-        } else if (diff < 0) {
-          trend.innerHTML = `<span class="trend-down">▼ ${diff}% from last week — declining</span>`;
-        } else {
-          trend.innerHTML = `<span class="trend-flat">◆ Holding steady</span>`;
-        }
-      } else {
-        trend.innerHTML = '<span class="trend-flat">Not enough data yet</span>';
-      }
-    }
 
     // ---- 4. HABIT INTEL ----
     function renderHabitIntel() {
@@ -2361,182 +2214,7 @@
       });
     }
 
-    // ---- 5. WEAK POINTS ----
-    function renderWeakPoints() {
-      const el = document.getElementById('weakPoints');
-      el.innerHTML = '';
-      const todayStr = today();
-      const dates = getMonthDates().filter(d => d <= todayStr);
-      if (!dates.length || !data.habits.length) {
-        el.innerHTML = '<div style="color:var(--text-dim);font-size:11px;">Not enough data</div>';
-        return;
-      }
 
-      // Worst habit
-      let worstHabit = null, worstPct = 101;
-      data.habits.forEach(h => {
-        const done = dates.filter(d => isChecked(h.id, d)).length;
-        const pct = Math.round((done / dates.length) * 100);
-        if (pct < worstPct) { worstPct = pct; worstHabit = h; }
-      });
-
-      // Weakest day of the week
-      const dowCounts = [0,0,0,0,0,0,0];
-      const dowTotals = [0,0,0,0,0,0,0];
-      dates.forEach(ds => {
-        const d = new Date(ds + 'T12:00:00');
-        const dow = d.getDay();
-        data.habits.forEach(h => {
-          dowTotals[dow]++;
-          if (isChecked(h.id, ds)) dowCounts[dow]++;
-        });
-      });
-      let worstDow = 0, worstDowPct = 101;
-      for (let i = 0; i < 7; i++) {
-        if (dowTotals[i] === 0) continue;
-        const p = Math.round((dowCounts[i] / dowTotals[i]) * 100);
-        if (p < worstDowPct) { worstDowPct = p; worstDow = i; }
-      }
-
-      // Longest gap (consecutive days with 0 checks)
-      let longestGap = 0, currentGap = 0;
-      dates.forEach(ds => {
-        const anyDone = data.habits.some(h => isChecked(h.id, ds));
-        if (!anyDone) { currentGap++; longestGap = Math.max(longestGap, currentGap); }
-        else { currentGap = 0; }
-      });
-
-      // Build cards
-      if (worstHabit) {
-        el.innerHTML += `
-          <div class="weak-point-card">
-            <div class="wp-icon">📉</div>
-            <div class="wp-info">
-              <div class="wp-title">Weakest Habit: ${escHtml(worstHabit.name)}</div>
-              <div class="wp-detail">Only ${worstPct}% this month — this is holding you back</div>
-            </div>
-          </div>`;
-      }
-
-      el.innerHTML += `
-        <div class="weak-point-card wp-warn">
-          <div class="wp-icon">📅</div>
-          <div class="wp-info">
-            <div class="wp-title">Weakest Day: ${DAYS_SHORT[worstDow]}</div>
-            <div class="wp-detail">${worstDowPct}% completion — you consistently slip here</div>
-          </div>
-        </div>`;
-
-      if (longestGap > 0) {
-        el.innerHTML += `
-          <div class="weak-point-card">
-            <div class="wp-icon">⏸</div>
-            <div class="wp-info">
-              <div class="wp-title">Longest Blackout: ${longestGap} day${longestGap > 1 ? 's' : ''}</div>
-              <div class="wp-detail">${longestGap > 3 ? 'That\'s too long — momentum dies fast' : 'Keep gaps short to maintain momentum'}</div>
-            </div>
-          </div>`;
-      }
-    }
-
-    // ---- 6. DAY-OF-WEEK CHART ----
-    function renderDowChart() {
-      const el = document.getElementById('dowChart');
-      el.innerHTML = '';
-      const todayStr = today();
-      const dates = getMonthDates().filter(d => d <= todayStr);
-      if (!dates.length || !data.habits.length) return;
-
-      const dowCounts = [0,0,0,0,0,0,0];
-      const dowTotals = [0,0,0,0,0,0,0];
-      dates.forEach(ds => {
-        const d = new Date(ds + 'T12:00:00');
-        const dow = d.getDay();
-        data.habits.forEach(h => {
-          dowTotals[dow]++;
-          if (isChecked(h.id, ds)) dowCounts[dow]++;
-        });
-      });
-
-      const dowPcts = [];
-      for (let i = 0; i < 7; i++) {
-        dowPcts.push(dowTotals[i] ? Math.round((dowCounts[i] / dowTotals[i]) * 100) : 0);
-      }
-
-      const bestPct = Math.max(...dowPcts);
-      const worstPct = Math.min(...dowPcts.filter(p => p > 0), bestPct);
-
-      // Display Mon-Sun order
-      const order = [1, 2, 3, 4, 5, 6, 0];
-      const dayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-
-      order.forEach((dow, i) => {
-        const pct = dowPcts[dow];
-        let fillClass = '';
-        if (pct === bestPct && pct > 0) fillClass = 'dow-best';
-        else if (pct === worstPct && pct <= bestPct) fillClass = 'dow-worst';
-
-        const wrap = document.createElement('div');
-        wrap.className = 'dow-bar-wrap';
-        wrap.innerHTML = `
-          <div class="dow-bar-track">
-            <div class="dow-bar-fill ${fillClass}" style="height:${pct}%"></div>
-          </div>
-          <div class="dow-label">${dayLabels[i]}</div>
-          <div class="dow-pct">${pct}%</div>
-        `;
-        el.appendChild(wrap);
-      });
-    }
-
-    // ---- 7. HEATMAP ----
-    function renderHeatmap() {
-      const container = document.getElementById('heatmapGrid');
-      container.innerHTML = '';
-
-      // Show heatmap for the currently viewed month, aligned to week grid
-      const firstDay = new Date(viewYear, viewMonth, 1);
-      const lastDay = new Date(viewYear, viewMonth + 1, 0);
-      // Align to Monday
-      let startDay = new Date(firstDay);
-      const dow = startDay.getDay();
-      const mondayOffset = dow === 0 ? 6 : dow - 1;
-      startDay.setDate(startDay.getDate() - mondayOffset);
-
-      // Fill until we pass the last day and land on a Sunday
-      let current = new Date(startDay);
-      const todayDate = new Date();
-
-      while (current <= lastDay || current.getDay() !== 1) {
-        const dateStr = fmtDate(current);
-        const isInMonth = (current.getMonth() === viewMonth && current.getFullYear() === viewYear);
-
-        const doneH = data.habits.filter(h => isChecked(h.id, dateStr)).length;
-        const totalH = data.habits.length || 1;
-        const ratio = doneH / totalH;
-
-        const cell = document.createElement('div');
-        cell.className = 'heatmap-cell';
-        if (ratio > 0 && ratio <= 0.25) cell.classList.add('lvl-1');
-        else if (ratio > 0.25 && ratio <= 0.5) cell.classList.add('lvl-2');
-        else if (ratio > 0.5 && ratio <= 0.75) cell.classList.add('lvl-3');
-        else if (ratio > 0.75) cell.classList.add('lvl-4');
-
-        if (!isInMonth) cell.style.opacity = '0.15';
-        else if (current > todayDate) cell.style.opacity = '0.3';
-
-        const tip = document.createElement('span');
-        tip.className = 'tooltip';
-        tip.textContent = `${MONTHS[current.getMonth()].substring(0, 3)} ${current.getDate()}: ${doneH}/${data.habits.length}`;
-        cell.appendChild(tip);
-
-        container.appendChild(cell);
-        current.setDate(current.getDate() + 1);
-
-        // Safety: break after 42 cells (6 weeks max)
-        if (container.children.length >= 42) break;
-      }
-    }
 
     // ========== YEARLY STATS ==========
 
